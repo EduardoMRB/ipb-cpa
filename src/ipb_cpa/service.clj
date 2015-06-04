@@ -6,16 +6,16 @@
             [ring.util.response :as ring-resp]
             [ipb-cpa.site.view :as view]))
 
-(defn home-page
-  [request]
+(defn home-page [_]
   (ring-resp/response (view/index)))
 
+(defn contact-page [_]
+  (ring-resp/response (view/contact)))
+
 (defroutes routes
-  ;; Defines "/" and "/about" routes with their associated :get handlers.
-  ;; The interceptors defined after the verb map (e.g., {:get home-page}
-  ;; apply to / and its children (/about).
   [[["/" {:get [:site#index home-page]}
-     ^:interceptors [(body-params/body-params) bootstrap/html-body]]]])
+     ^:interceptors [(body-params/body-params) bootstrap/html-body]
+     ["/contato" {:get [:site#contact contact-page]}]]]])
 
 ;; Consumed by ipb-cpa.server/create-server
 ;; See bootstrap/default-interceptors for additional options you can configure
