@@ -49,7 +49,6 @@
                        :style "border:0"}]]
            ;; JavaScript resources.
            [:script {:src "http://code.jquery.com/jquery-2.1.0.min.js"}]
-           [:script {:src "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"}]
            [:script {:src "js/out/goog/base.js"}]
            [:script {:src "js/app.js"}]
            [:script "goog.require('ipb_cpa.core');"]]]]))
