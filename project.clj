@@ -4,6 +4,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.7.0-RC1"]
+                 [org.clojure/clojurescript "0.0-3308"]
                  [io.pedestal/pedestal.service "0.4.0"]
 
                  ;; Remove this line and uncomment one of the next lines to
@@ -20,6 +21,14 @@
                  [com.taoensso/carmine "2.10.0"]
                  
                  [hiccup "1.0.5"]]
+  :plugins [[lein-cljsbuild "1.0.6"]]
+  :cljsbuild {:builds [{:id "dev"
+                        :source-paths ["src-cljs"]
+                        :compiler {:output-to "resources/public/js/app.js"
+                                   :output-dir "resources/public/js/out"
+                                   :optimizations :none
+                                   ;; :source-map true
+                                   :pretty-print true}}]}
   :min-lein-version "2.0.0"
   :resource-paths ["config", "resources"]
   :profiles {:dev {:aliases {"run-dev" ["trampoline" "run" "-m" "ipb-cpa.server/run-dev"]}

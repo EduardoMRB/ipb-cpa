@@ -3,3 +3,5 @@ tmp/
 logs/
 /.lein-repl-history
 /.nrepl-port
+resources/public/js/out/
+resources/public/js/app.js
