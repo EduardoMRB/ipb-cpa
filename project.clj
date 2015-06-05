@@ -27,7 +27,6 @@
                         :compiler {:output-to "resources/public/js/app.js"
                                    :output-dir "resources/public/js/out"
                                    :optimizations :none
-                                   ;; :source-map true
                                    :pretty-print true}}]}
   :min-lein-version "2.0.0"
   :resource-paths ["config", "resources"]
