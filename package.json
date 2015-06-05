@@ -1,0 +1,31 @@
+{
+  "name": "ipb-cpa",
+  "version": "0.0.0",
+  "description": "Website for the First Presbiteryan Church of CPA IV",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EduardoMRB/ipb-cpa.git"
+  },
+  "keywords": [
+    "church",
+    "presbiteryan",
+    "cpa"
+  ],
+  "author": "Eduardo Borges <eduardomrb@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EduardoMRB/ipb-cpa/issues"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.5.2",
+    "gulp-sass": "^2.0.1"
+  }
+}

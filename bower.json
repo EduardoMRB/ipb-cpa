@@ -1,0 +1,25 @@
+{
+  "name": "ipb-cpa",
+  "version": "0.0.0",
+  "homepage": "https://github.com/EduardoMRB/ipb-cpa",
+  "authors": [
+    "Eduardo Borges <eduardomrb@gmail.com>"
+  ],
+  "description": "Website for the First Presbiteryan Church of CPA IV",
+  "keywords": [
+    "church",
+    "presbiteryan",
+    "cpa"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "foundation": "~5.5.2"
+  }
+}

@@ -29,7 +29,7 @@
           [:title "Igreja Presbiteriana do CPA IV"]
           [:meta {:name :view-port
                   :context "width=device-width, initial-scale=1"}]
-          [:link {:href "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"
+          [:link {:href "css/app.css"
                   :rel "stylesheet"}]
           [:body
            [:div.container

@@ -5,3 +5,6 @@ logs/
 /.nrepl-port
 resources/public/js/out/
 resources/public/js/app.js
+resources/public/css/app.css
+/bower_components
+/node_modules
