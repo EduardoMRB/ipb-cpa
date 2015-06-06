@@ -9,7 +9,7 @@
    [:em (:reference (get-verse))]])
 
 (defn menu []
-  [:nav.top-nav
+  [:nav.top-nav.large-10.columns
    [:ul.top-menu
     [:li [:a {:href "#"} "Sobre"]]
     [:li [:a {:href "#"} "Programação"]]
@@ -18,8 +18,8 @@
     [:li [:a {:href "#"} "Missões"]]]])
 
 (defn header []
-  [:div.row
-   [:a {:href (url-for :site#index)}
+  [:div.row.site-header
+   [:a.large-2.columns {:href (url-for :site#index)}
     [:img {:src "images/ipb-logo.png"}]]
    (menu)])
 
