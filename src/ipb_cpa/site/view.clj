@@ -3,6 +3,21 @@
             [io.pedestal.http.route :refer [url-for]]
             [ipb-cpa.site.daily-verse :refer [get-verse]]))
 
+(defn menu []
+  [:nav.top-nav.large-10.columns
+   [:ul.top-menu
+    [:li [:a {:href "#"} "Sobre"]]
+    [:li [:a {:href "#"} "Programação"]]
+    [:li [:a {:href "#"} "Mensagens e Estudos"]]
+    [:li [:a {:href (url-for :site#contact)} "Fale Conosco"]]
+    [:li [:a {:href "#"} "Missões"]]]])
+
+(defn header []
+  [:div.row.site-header
+   [:a.large-2.columns {:href (url-for :site#index)}
+    [:img {:src "images/ipb-logo.png"}]]
+   (menu)])
+
 (defn layout [body]
   (html5 {:lang "pt-br"}
          [:head
@@ -31,21 +46,6 @@
            [:script {:src "js/out/goog/base.js"}]
            [:script {:src "js/app.js"}]
            [:script "goog.require('ipb_cpa.core');"]]]]))
-
-(defn menu []
-  [:nav.top-nav.large-10.columns
-   [:ul.top-menu
-    [:li [:a {:href "#"} "Sobre"]]
-    [:li [:a {:href "#"} "Programação"]]
-    [:li [:a {:href "#"} "Mensagens e Estudos"]]
-    [:li [:a {:href (url-for :site#contact)} "Fale Conosco"]]
-    [:li [:a {:href "#"} "Missões"]]]])
-
-(defn header []
-  [:div.row.site-header
-   [:a.large-2.columns {:href (url-for :site#index)}
-    [:img {:src "images/ipb-logo.png"}]]
-   (menu)])
 
 (defn random-verses []
   [:div.small-12.large-6.columns

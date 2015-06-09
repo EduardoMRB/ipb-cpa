@@ -19,6 +19,10 @@
                  [org.slf4j/log4j-over-slf4j "1.7.7"]
 
                  [com.taoensso/carmine "2.10.0"]
+
+                 [instaparse "1.4.0"]
+                 [yesql "0.4.0"]
+                 [mysql/mysql-connector-java "5.1.32"]
                  
                  [hiccup "1.0.5"]]
   :plugins [[lein-cljsbuild "1.0.6"]]
@@ -34,6 +38,7 @@
                    :dependencies [[io.pedestal/pedestal.service-tools "0.4.0"]
                                   [midje "1.7.0-beta1"]
                                   [org.clojure/tools.namespace "0.2.10"]
-                                  [ns-tracker "0.3.0"]]
+                                  [ns-tracker "0.3.0"]
+                                  [org.xerial/sqlite-jdbc "3.7.2"]]
                    :source-paths ["dev"]}
              :uberjar {:aot [ipb-cpa.server]}})
