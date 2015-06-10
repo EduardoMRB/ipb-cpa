@@ -22,12 +22,12 @@
         schedule))
 
 (defn- transform-schedules [schedules]
-  (let [xformed (reduce (fn [xfrmd schedule]
+  (let [xformed (reduce (fn [xfrmd event]
                           (update-in xfrmd
-                                     [(:day_of_the_week schedule)]
+                                     [(:day_of_the_week event)]
                                      #(if (seq %)
-                                        (sort-events (conj % schedule))
-                                        [schedule])))
+                                        (sort-events (conj % event))
+                                        [event])))
                         {}
                         schedules)]
     (sort-days-of-week xformed)))
