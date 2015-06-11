@@ -6,8 +6,9 @@
             [ring.util.response :as ring-resp]
             [ipb-cpa.site.view :as view]))
 
-(defn home-page [_]
-  (ring-resp/response (view/index)))
+(defn home-page [request]
+  (let [db (get-in request [:system :database])]
+    (ring-resp/response (view/index db))))
 
 (defn contact-page [_]
   (ring-resp/response (view/contact)))

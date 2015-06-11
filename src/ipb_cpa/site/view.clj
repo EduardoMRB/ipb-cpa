@@ -1,7 +1,9 @@
 (ns ipb-cpa.site.view
   (:require [hiccup.page :refer [html5]]
             [io.pedestal.http.route :refer [url-for]]
-            [ipb-cpa.site.daily-verse :refer [get-verse]]))
+            [ipb-cpa.site.daily-verse :refer [get-verse]]
+            [ipb-cpa.site.schedule :as schedule]
+            [ipb-cpa.db :as db]))
 
 (defn menu []
   [:nav.top-nav.large-10.columns
@@ -53,28 +55,18 @@
    [:p (:text (get-verse))]
    [:em (:reference (get-verse))]])
 
-(defn schedule-list [title events]
-  (list
-    [:h3 title]
-    [:ul
-     (for [[time desc] events]
-       [:li [:em time] (str " - " desc)])]))
-
-(defn weekly-schedule []
+(defn weekly-schedule [database]
   [:div.small-12.large-6.columns
    [:h2 "Programação Semanal"]
-   (schedule-list "Terça" [["19:30" "Reunião nos lares"]])
-   (schedule-list "Quinta" [["19:30" "Reunião de oração"]])
-   (schedule-list "Domingo" [["08:30" "Escola bíblica dominical"]
-                             ["19:00" "Culto da família"]])])
+   (schedule/get-schedule-view (db/get-schedules database))])
 
-(defn home-first-row []
+(defn home-first-row [db]
   [:div.row
-   (weekly-schedule)
+   (weekly-schedule db)
    (random-verses)])
 
-(defn index []
-  (layout (home-first-row)))
+(defn index [db]
+  (layout (home-first-row db)))
 
 (defn contact []
   (layout
