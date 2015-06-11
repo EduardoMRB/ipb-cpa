@@ -1,6 +1,5 @@
 (ns ipb-cpa.site.schedule
-  (:require [ipb-cpa.db :as db]
-            [clj-time.format :as f]))
+  (:require [clj-time.format :as f]))
 
 (def ^:private days-of-the-week
   ["Segunda" "Terça" "Quarta" "Quinta" "Sexta" "Sábado" "Domingo"])
@@ -39,8 +38,8 @@
     (for [{:keys [time description]} schedules]
          [:li [:em time] (str " - " description)])]))
 
-(defn get-schedule-view []
-  (if-let [schedules (seq (db/get-schedules nil))]
+(defn get-schedule-view [schedules]
+  (if (seq schedules)
     (mapcat
      build-schedule-row
      (transform-schedules schedules))))
