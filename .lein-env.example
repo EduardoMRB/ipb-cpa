@@ -1,0 +1,4 @@
+{:db-subprotocol "postgresql"
+ :db-subname "//localhost:5432/ipb"
+ :db-username "postgres"
+ :db-password ""}

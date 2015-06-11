@@ -8,3 +8,4 @@ resources/public/js/app.js
 resources/public/css/app.css
 /bower_components
 /node_modules
+/.lein-env

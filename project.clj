@@ -22,9 +22,14 @@
 
                  [instaparse "1.4.0"]
                  [yesql "0.4.0"]
-                 [mysql/mysql-connector-java "5.1.32"]
+                 [org.postgresql/postgresql "9.4-1201-jdbc41"]
+                 [ragtime "0.3.9"]
+                 [environ "1.0.0"]
+
+                 [com.stuartsierra/component "0.2.3"]
                  
-                 [hiccup "1.0.5"]]
+                 [hiccup "1.0.5"]
+                 [ragtime/ragtime.lein "0.3.9"]]
   :plugins [[lein-cljsbuild "1.0.6"]]
   :cljsbuild {:builds [{:id "dev"
                         :source-paths ["src-cljs"]
