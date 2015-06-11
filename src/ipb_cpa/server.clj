@@ -18,10 +18,7 @@
 (def system-interceptor
   (interceptor/on-request
    (fn [request]
-     (let [system-map (system/system {:subprotocol (env :db-subprotocol)
-                                      :subname (env :db-subname)
-                                      :username (env :db-username)
-                                      :password (env :db-password)})]
+     (let [system-map (system/system (env :db-connection-uri))]
        (assoc request :system (component/start system-map))))))
 
 (defn attach-system-interceptor [service-map]

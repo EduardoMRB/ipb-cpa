@@ -2,24 +2,17 @@
   (:require [com.stuartsierra.component :as component]))
 
 ;; Components
-(defrecord Database [subprotocol subname username password]
+(defrecord Database [connection-uri]
   component/Lifecycle
   (start [component]
-    (let [db-spec {:subprotocol subprotocol
-                   :subname subname
-                   :user username
-                   :password password}]
-      (assoc component :database db-spec)))
+    (assoc component :db {:connection-uri connection-uri}))
   (stop [component]
-    (dissoc component :database)))
+    (dissoc component :db)))
 
-(defn make-database [config]
-  (map->Database {:subprotocol (:subprotocol config)
-                  :subname (:subname config)
-                  :username (:username config)
-                  :password (:password config)}))
+(defn make-database [connection-uri]
+  (->Database connection-uri))
 
 ;; System
-(defn system [config]
+(defn system [connection-uri]
   (component/system-map
-   :database (make-database config)))
+   :database (make-database connection-uri)))

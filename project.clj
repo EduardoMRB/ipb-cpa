@@ -20,6 +20,8 @@
 
                  [com.taoensso/carmine "2.10.0"]
 
+                 [ns-tracker "0.3.0"]
+
                  [instaparse "1.4.0"]
                  [yesql "0.4.0"]
                  [org.postgresql/postgresql "9.4-1201-jdbc41"]
@@ -28,9 +30,11 @@
 
                  [com.stuartsierra/component "0.2.3"]
                  
-                 [hiccup "1.0.5"]
-                 [ragtime/ragtime.lein "0.3.9"]]
-  :plugins [[lein-cljsbuild "1.0.6"]]
+                 [hiccup "1.0.5"]]
+  :ragtime {:migrations ragtime.sql.files/migrations
+            :database "jdbc:postgresql://localhost:5432/ipb?user=postgres&password=asdzxc"}
+  :plugins [[lein-cljsbuild "1.0.6"]
+            [ragtime/ragtime.lein "0.3.9"]]
   :cljsbuild {:builds [{:id "dev"
                         :source-paths ["src-cljs"]
                         :compiler {:output-to "resources/public/js/app.js"
@@ -43,7 +47,6 @@
                    :dependencies [[io.pedestal/pedestal.service-tools "0.4.0"]
                                   [midje "1.7.0-beta1"]
                                   [org.clojure/tools.namespace "0.2.10"]
-                                  [ns-tracker "0.3.0"]
                                   [org.xerial/sqlite-jdbc "3.7.2"]]
                    :source-paths ["dev"]}
              :uberjar {:aot [ipb-cpa.server]}})
