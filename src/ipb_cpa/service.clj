@@ -4,7 +4,8 @@
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.http.route.definition :refer [defroutes]]
             [ring.util.response :as ring-resp]
-            [ipb-cpa.site.view :as view]))
+            [ipb-cpa.site.view :as view]
+            [ipb-cpa.view.admin-view :as admin-view]))
 
 (defn home-page [request]
   (let [db (get-in request [:system :database])]
@@ -13,10 +14,18 @@
 (defn contact-page [_]
   (ring-resp/response (view/contact)))
 
+(defn admin-login-page [_]
+  (ring-resp/response "Login page!"))
+
+(defn admin-schedule-page [_]
+  (ring-resp/response (admin-view/schedule-index)))
+
 (defroutes routes
   [[["/" {:get [:site#index home-page]}
      ^:interceptors [(body-params/body-params) bootstrap/html-body]
-     ["/contato" {:get [:site#contact contact-page]}]]]])
+     ["/contato" {:get [:site#contact contact-page]}]
+     ["/admin" {:get [:admin#login admin-login-page]}
+      ["/schedule" {:get [:admin.schedule#index admin-schedule-page]}]]]]])
 
 ;; Consumed by ipb-cpa.server/create-server
 ;; See bootstrap/default-interceptors for additional options you can configure
