@@ -21,8 +21,8 @@
      (let [system-map (system/system (env :db-connection-uri))]
        (assoc request :system (component/start system-map))))))
 
-(defn attach-system-interceptor [service-map]
-  (update-in service-map [::server/interceptors] #(conj % system-interceptor)))
+(defn attach-interceptor [service-map interceptor]
+  (update-in service-map [::server/interceptors] #(conj % interceptor)))
 
 (defn run-dev
   "The entry-point for 'lein run-dev'"
@@ -44,7 +44,7 @@
       ;; Wire up interceptor chains
       server/default-interceptors
       server/dev-interceptors
-      attach-system-interceptor
+      (attach-interceptor system-interceptor)
       server/create-server
       server/start))
 
@@ -56,6 +56,6 @@
   [& args]
   (println "\nCreating your server...")
   (-> service/service
-      attach-system-interceptor
+      (attach-interceptor system-interceptor)
       server/create-server
       server/start))

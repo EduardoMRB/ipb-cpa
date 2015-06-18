@@ -1,2 +1,4 @@
 {:db-connection-uri
- "jdbc:postgresql://localhost:5432/ipb?user=postgres&password=asdzxc"}
+ "jdbc:postgresql://localhost:5432/ipb?user=postgres&password=pass"
+ :test-db-connection-uri
+ "jdbc:postgresql://localhost:5432/ipb-test?user=postgres&password=pass"}

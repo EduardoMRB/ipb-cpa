@@ -8,7 +8,7 @@
             [ipb-cpa.view.admin-view :as admin-view]))
 
 (defn home-page [request]
-  (let [db (get-in request [:system :database])]
+  (let [db (get-in request [:system :database :db])]
     (ring-resp/response (view/index db))))
 
 (defn contact-page [_]
