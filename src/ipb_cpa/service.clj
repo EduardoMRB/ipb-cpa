@@ -17,8 +17,9 @@
 (defn admin-login-page [_]
   (ring-resp/response "Login page!"))
 
-(defn admin-schedule-page [_]
-  (ring-resp/response (admin-view/schedule-index)))
+(defn admin-schedule-page [request]
+  (let [db (get-in request [:system :database :db])]
+    (ring-resp/response (admin-view/schedule-index db))))
 
 (defroutes routes
   [[["/" {:get [:site#index home-page]}
