@@ -19,6 +19,9 @@
                  [org.slf4j/jcl-over-slf4j "1.7.7"]
                  [org.slf4j/log4j-over-slf4j "1.7.7"]
 
+                 [cheshire "5.5.0"]
+                 [cljs-ajax "0.3.13"]
+
                  [com.taoensso/carmine "2.10.0"]
 
                  [ns-tracker "0.3.0"]

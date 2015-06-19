@@ -21,12 +21,18 @@
   (let [db (get-in request [:system :database :db])]
     (ring-resp/response (admin-view/schedule-index db))))
 
+(defn get-json-schedules [request]
+  (let [db (get-in request [:system :database :db])]
+    (ring-resp/response (admin-view/json-schedules db))))
+
 (defroutes routes
   [[["/" {:get [:site#index home-page]}
      ^:interceptors [(body-params/body-params) bootstrap/html-body]
      ["/contato" {:get [:site#contact contact-page]}]
      ["/admin" {:get [:admin#login admin-login-page]}
-      ["/schedule" {:get [:admin.schedule#index admin-schedule-page]}]]]]])
+      ["/schedule" {:get [:admin.schedule#index admin-schedule-page]}]]]
+    ["/api" ^:interceptors [(body-params/body-params bootstrap/json-body)]
+     ["/schedule" {:get [:api.schedule#index get-json-schedules]}]]]])
 
 ;; Consumed by ipb-cpa.server/create-server
 ;; See bootstrap/default-interceptors for additional options you can configure
