@@ -16,13 +16,29 @@
      {:handler handler
       :error-handler err-handler})
 
+;; Behavior functions
+
 ;; Om components
+(defn tab [day owner]
+  (reify
+   om/IRenderState
+   (render-state [_ {:keys [active-tab]}]
+     (dom/li #js {:className (str "tab-title" (if (= active-tab day) " active"))}
+       (dom/a #js {:onClick #(.log js/console "clicked")}
+              day)))))
+
 (defn tabs [_ _]
   (let [days-of-the-week ["Seg" "Ter" "Quar" "Quin" "Sex" "Sab" "Dom"]]
     (reify
-     om/IRender
-     (render [_]
-       (apply dom/ul nil (map (partial dom/li nil) days-of-the-week))))))
+     om/IInitState
+     (init-state [_]
+       {:active-tab "Seg"})
+     om/IRenderState
+     (render-state [_ {:keys [active-tab]}]
+       (apply dom/ul #js {:className "tabs"}
+              (om/build-all tab
+                            days-of-the-week
+                            {:init-state {:active-tab active-tab}}))))))
 
 (defn schedule [data owner]
   (reify
