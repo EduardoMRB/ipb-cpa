@@ -1,9 +1,19 @@
 (ns ipb-cpa.admin-schedule
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om]
             [om.dom :as dom]
-            [ajax.core :refer [GET]]))
+            [ajax.core :refer [GET]]
+            [cljs.core.async :as async :refer [chan put! <! >!]]))
 
-(def app-state (atom {:schedules []}))
+(def app-state (atom {:schedules []
+                      :active-tab "Seg"
+                      :days-of-the-week [{:day "Seg" :active? true}
+                                         {:day "Ter" :active? false}
+                                         {:day "Quar" :active? false}
+                                         {:day "Quin" :active? false}
+                                         {:day "Sex" :active? false}
+                                         {:day "Sab" :active? false}
+                                         {:day "Dom" :active? false}]}))
 
 ;; Ajax stuff
 (defn handler [resp]
@@ -16,29 +26,37 @@
      {:handler handler
       :error-handler err-handler})
 
-;; Behavior functions
-
 ;; Om components
-(defn tab [day owner]
+(defn tab [{:keys [day active?]} owner]
   (reify
    om/IRenderState
-   (render-state [_ {:keys [active-tab]}]
-     (dom/li #js {:className (str "tab-title" (if (= active-tab day) " active"))}
-       (dom/a #js {:onClick #(.log js/console "clicked")}
+   (render-state [_ {:keys [active]}]
+     (dom/li #js {:className (str "tab-title" (if active? " active"))}
+       (dom/a #js {:onClick #(put! active day)}
               day)))))
 
-(defn tabs [_ _]
-  (let [days-of-the-week ["Seg" "Ter" "Quar" "Quin" "Sex" "Sab" "Dom"]]
-    (reify
-     om/IInitState
-     (init-state [_]
-       {:active-tab "Seg"})
-     om/IRenderState
-     (render-state [_ {:keys [active-tab]}]
-       (apply dom/ul #js {:className "tabs"}
-              (om/build-all tab
-                            days-of-the-week
-                            {:init-state {:active-tab active-tab}}))))))
+(defn tabs [data owner]
+  (reify
+   om/IInitState
+   (init-state [_]
+     {:active (chan)
+      :active-tab "Seg"})
+   om/IWillMount
+   (will-mount [_]
+     (let [active (om/get-state owner :active)]
+       (go
+        (while true
+          (let [active-tab (<! active)]
+            (om/transact! data
+                          (fn [app-state]
+                            ;; TODO: Change app-state structure to a map
+                            app-state)))))))
+   om/IRenderState
+   (render-state [_ {:keys [active]}]
+     (apply dom/ul #js {:className "tabs"}
+            (om/build-all tab
+                          (:days-of-the-week data)
+                          {:init-state {:active active}})))))
 
 (defn schedule [data owner]
   (reify
@@ -50,5 +68,5 @@
 
 (om/root
  schedule
- {}
+ app-state
  {:target (.getElementById js/document "schedule-component")})
