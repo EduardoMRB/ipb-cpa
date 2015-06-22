@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+
+migration_name = ARGV.first
+
+exit if migration_name.nil?
+
+MIGRATION_FOLDER = "migrations"
+
+def build_migration_names(mig_name)
+  time = Time.now.strftime("%Y%m%d%H%M%S")
+  ["#{MIGRATION_FOLDER}/#{time}-#{mig_name}.up.sql",
+   "#{MIGRATION_FOLDER}/#{time}-#{mig_name}.down.sql"]
+end
+
+build_migration_names(migration_name).each do |filename|
+  puts "Creating file: #{filename}"
+  FileUtils.touch(filename)
+end
