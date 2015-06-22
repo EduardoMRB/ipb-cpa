@@ -27,7 +27,9 @@
 
 (GET "/api/schedule"
      {:handler handler
-      :error-handler err-handler})
+      :error-handler err-handler
+      :response-format :json
+      :keywords? true})
 
 ;; Util functions
 (defn tab-name [tab-keyword]
@@ -72,7 +74,10 @@
   (reify
    om/IRender
    (render [_]
-     (dom/li nil (:days-of-the-week schedule)))))
+     (dom/li nil (str (:description schedule) " - " (:time schedule) " ")
+             (apply dom/ul #js {:className "button-group"}
+                    (dom/button #js {:className "tiny"} "Editar")
+                    (dom/button #js {:className "tiny alert"} "Remover"))))))
 
 (defn schedule-list [data owner]
   (reify
@@ -85,16 +90,11 @@
                                      active?))
                            (ffirst)
                            (mappings))
-           schedule (->> (:schedules data)
-                         (filter (fn [[dow _]]
-                                   (= active-tab dow))))
-           sch (if (seq schedule)
-                 (-> schedule
-                     (first)
-                     (second))
-                 [])]
+           schedule-items (->> (:schedules data)
+                               (filter (fn [{:keys [day_of_the_week]}]
+                                         (= active-tab day_of_the_week))))]
        (apply dom/ul nil
-              (om/build-all schedule-line sch))))))
+              (om/build-all schedule-line schedule-items))))))
 
 (defn schedule [data owner]
   (reify
