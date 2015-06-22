@@ -21,6 +21,15 @@ $ bower install
 
 After the installation, run `$ gulp` to compile assets and watch for changes.
 
+## Migrations and Env variables
+
+Follow to model of `lein-env.example` to create `lein.env` conforming to your
+environment.
+
+Go to `project.clj`, on `:ragtime` key, change the `:database` string to your
+database credentials. After the previous step is done, you can run the migrations with
+`lein ragtime migrate`.
+
 ## Compile ClojureScript
 
 Only supported in dev environment `$ lein cljsbuild auto dev`
