@@ -5,9 +5,8 @@
             [ajax.core :refer [GET]]
             [cljs.core.async :as async :refer [chan put! <! >!]]
             [clojure.string :as s]
-            (cljs-time.core :as t)
-            [cljs-time.format :as f])
-  (:import goog.date.Date))
+            [cljs-time.core :as t]
+            [cljs-time.format :as f]))
 
 (enable-console-print!)
 
