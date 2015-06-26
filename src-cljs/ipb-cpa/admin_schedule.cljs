@@ -61,6 +61,15 @@
                   :else 0)))
         schedules))
 
+;; Component functions
+(defn delete-schedule
+  "Deletes passed shedules from the app-state"
+  [data schedule]
+  (om/transact! data
+               :schedules
+               (fn [schedules]
+                 (vec (remove (partial = schedule) schedules)))))
+
 (defn add-schedule [data args]
   (let [owner (:owner args)
         schedule (dissoc args :owner)]
@@ -70,6 +79,7 @@
 
 (defn handle-change [e key owner]
   (om/set-state! owner key (get-input-value (.-target e))))
+
 
 ;; Om components
 (defn tab [[day active?] owner]
@@ -166,12 +176,6 @@
                                                  :day_of_the_week (active-tab days-of-the-week)
                                                  :owner owner})}
                  "Criar")))))))))
-
-(defn delete-schedule [data schedule]
-  (om/transact! data
-               :schedules
-               (fn [schedules]
-                 (vec (remove (partial = schedule) schedules)))))
 
 (defn schedule [data owner]
   (reify
