@@ -4,7 +4,10 @@
             [om.dom :as dom]
             [ajax.core :refer [GET]]
             [cljs.core.async :as async :refer [chan put! <! >!]]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            (cljs-time.core :as t)
+            [cljs-time.format :as f])
+  (:import goog.date.Date))
 
 (enable-console-print!)
 
@@ -46,6 +49,18 @@
                    active?))
          (ffirst)
          (mappings))))
+
+(defn sort-schedules
+  "Sort schedules by time in ascending order."
+  [schedules]
+  (sort (fn [a b]
+          (let [fmt (f/formatters :hour-minute)
+                a-time (f/parse fmt (:time a))
+                b-time (f/parse fmt (:time b))]
+            (cond (t/after? a-time b-time) 1
+                  (t/after? b-time a-time) -1
+                  :else 0)))
+        schedules))
 
 ;; Om components
 (defn tab [[day active?] owner]
@@ -90,12 +105,17 @@
        (dom/button #js {:className "tiny"} "Editar")
        (dom/button #js {:className "tiny alert"} "Remover")))))
 
-
+(defn handle-change [e key owner]
+  (om/set-state! owner key (get-input-value (.-target e))))
 
 (defn schedule-list [{:keys [days-of-the-week schedules]} owner]
   (reify
+   om/IInitState
+   (init-state [_]
+     {:description ""
+      :time ""})
    om/IRenderState
-   (render-state [_ {:keys [add]}]
+   (render-state [_ {:keys [add description time]}]
      (let [active-day (active-tab days-of-the-week)
            schedule-items (->> schedules
                                (filter (fn [{:keys [day_of_the_week]}]
@@ -112,11 +132,17 @@
                    (dom/div #js {:className "small-3 columns"}
                      (dom/span #js {:className "prefix"} "Nome"))
                    (dom/div #js {:className "small-9 columns"}
-                     (dom/input #js {:type "text" :ref "schedule-name"}))))
+                     (dom/input #js {:type "text"
+                                     :ref "schedule-name"
+                                     :value description
+                                     :onChange #(handle-change % :description owner)}))))
                (dom/div #js {:className "large-6 columns"}
                  (dom/div #js {:className "row collapse postfix-radius"}
                    (dom/div #js {:className "small-9 columns"}
-                     (dom/input #js {:type "text" :ref "schedule-time"}))
+                     (dom/input #js {:type "text"
+                                     :ref "schedule-time"
+                                     :value time
+                                     :onChange #(handle-change % :time owner)}))
                    (dom/div #js {:className "small-3 columns"}
                      (dom/span #js {:className "postfix"}
                        "Horário")))))
@@ -127,11 +153,16 @@
                                 :onClick #(put! add
                                                 {:description (get-input-value (om/get-node owner "schedule-name"))
                                                  :time (get-input-value (om/get-node owner "schedule-time"))
-                                                 :day_of_the_week (active-tab days-of-the-week)})}
+                                                 :day_of_the_week (active-tab days-of-the-week)
+                                                 :owner owner})}
                  "Criar")))))))))
 
-(defn add-schedule [data schedule]
-  (om/transact! data :schedules #(conj % schedule)))
+(defn add-schedule [data args]
+  (let [owner (:owner args)
+        schedule (dissoc args :owner)]
+  (om/transact! data :schedules #(sort-schedules (conj % schedule)))
+  (om/set-state! owner :description "")
+  (om/set-state! owner :time "")))
 
 (defn schedule [data owner]
   (reify
@@ -142,11 +173,10 @@
    (will-mount [_]
      (let [add (om/get-state owner :add)]
        (go (while true
-             (let [schedule (<! add)]
-               (add-schedule data schedule))))))
+             (let [args (<! add)]
+               (add-schedule data args))))))
    om/IRenderState
    (render-state [_ {:keys [add]}]
-     (prn (:schedules data))
      (dom/div #js {:className "large-8 columns"}
        (dom/h2 nil "Schedule Component")
        (om/build tabs data)

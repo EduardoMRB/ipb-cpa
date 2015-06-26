@@ -32,6 +32,8 @@
                  [ragtime "0.3.9"]
                  [environ "1.0.0"]
 
+                 [com.andrewmcveigh/cljs-time "0.3.7"]
+
                  [com.stuartsierra/component "0.2.3"]
                  
                  [hiccup "1.0.5"]]
