@@ -3,7 +3,7 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [ajax.core :refer [GET]]
-            [cljs.core.async :as async :refer [chan put! <! >!]]
+            [cljs.core.async :as async :refer [chan put! <! >! alts!]]
             [clojure.string :as s]
             [cljs-time.core :as t]
             [cljs-time.format :as f]))
@@ -61,6 +61,16 @@
                   :else 0)))
         schedules))
 
+(defn add-schedule [data args]
+  (let [owner (:owner args)
+        schedule (dissoc args :owner)]
+  (om/transact! data :schedules #(sort-schedules (conj % schedule)))
+  (om/set-state! owner :description "")
+  (om/set-state! owner :time "")))
+
+(defn handle-change [e key owner]
+  (om/set-state! owner key (get-input-value (.-target e))))
+
 ;; Om components
 (defn tab [[day active?] owner]
   (reify
@@ -98,14 +108,13 @@
 
 (defn schedule-line [schedule owner]
   (reify
-   om/IRender
-   (render [_]
+   om/IRenderState
+   (render-state [_ {:keys [delete]}]
      (dom/li nil (str (:description schedule) " - " (:time schedule) " ")
        (dom/button #js {:className "tiny"} "Editar")
-       (dom/button #js {:className "tiny alert"} "Remover")))))
-
-(defn handle-change [e key owner]
-  (om/set-state! owner key (get-input-value (.-target e))))
+       (dom/button #js {:className "tiny alert"
+                        :onClick #(put! delete schedule)}
+         "Remover")))))
 
 (defn schedule-list [{:keys [days-of-the-week schedules]} owner]
   (reify
@@ -114,14 +123,16 @@
      {:description ""
       :time ""})
    om/IRenderState
-   (render-state [_ {:keys [add description time]}]
+   (render-state [_ {:keys [add delete description time]}]
      (let [active-day (active-tab days-of-the-week)
            schedule-items (->> schedules
                                (filter (fn [{:keys [day_of_the_week]}]
                                          (= active-day day_of_the_week))))]
        (dom/div #js {:className "row"}
          (apply dom/ul nil
-                (om/build-all schedule-line schedule-items))
+                (om/build-all schedule-line
+                              schedule-items
+                              {:init-state {:delete delete}}))
          (dom/form nil
            (dom/fieldset nil
              (dom/legend nil "Inserir programação")
@@ -156,33 +167,37 @@
                                                  :owner owner})}
                  "Criar")))))))))
 
-(defn add-schedule [data args]
-  (let [owner (:owner args)
-        schedule (dissoc args :owner)]
-  (om/transact! data :schedules #(sort-schedules (conj % schedule)))
-  (om/set-state! owner :description "")
-  (om/set-state! owner :time "")))
+(defn delete-schedule [data schedule]
+  (om/transact! data
+               :schedules
+               (fn [schedules]
+                 (vec (remove (partial = schedule) schedules)))))
 
 (defn schedule [data owner]
   (reify
    om/IInitState
    (init-state [_]
-     {:add (chan)})
+     {:add (chan)
+      :delete (chan)})
    om/IWillMount
    (will-mount [_]
-     (let [add (om/get-state owner :add)]
+     (let [add (om/get-state owner :add)
+           delete (om/get-state owner :delete)]
        (go (while true
-             (let [args (<! add)]
-               (add-schedule data args))))))
+             (let [[v c] (alts! [add delete])]
+               (condp = c
+                 add (add-schedule data v)
+                 delete (delete-schedule data v)))))))
    om/IRenderState
-   (render-state [_ {:keys [add]}]
+   (render-state [_ {:keys [add delete]}]
      (dom/div #js {:className "large-8 columns"}
        (dom/h2 nil "Schedule Component")
        (om/build tabs data)
        (om/build schedule-list
                  {:schedules (:schedules data)
                   :days-of-the-week (:days-of-the-week data)}
-                 {:init-state {:add add}})))))
+                 {:init-state {:add add
+                               :delete delete}})))))
 
 (om/root
  schedule
