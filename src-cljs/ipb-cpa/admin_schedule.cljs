@@ -118,13 +118,47 @@
 
 (defn schedule-line [schedule owner]
   (reify
+   om/IInitState
+   (init-state [_]
+     {:editing false
+      :description (:description schedule)
+      :time (:time schedule)})
    om/IRenderState
-   (render-state [_ {:keys [delete]}]
-     (dom/li nil (str (:description schedule) " - " (:time schedule) " ")
-       (dom/button #js {:className "tiny"} "Editar")
-       (dom/button #js {:className "tiny alert"
-                        :onClick #(put! delete schedule)}
-         "Remover")))))
+   (render-state [_ {:keys [editing delete update description time]}]
+     (if editing
+       (dom/div #js {:className "large-12 columns"}
+         (dom/div #js {:className "small-6 columns"}
+           (dom/label nil "Nome"
+             (dom/input #js {:type "text"
+                             :ref "description"
+                             :value description
+                             :onChange #(handle-change % :description owner)})))
+         (dom/div #js {:className "small-6 columns"}
+           (dom/label nil "Horario"
+             (dom/input #js {:type "text"
+                             :ref "time"
+                             :value time
+                             :onChange #(handle-change % :time owner )})))
+         (dom/div #js {:className "row"}
+           (dom/div #js {:className "large-offset-8 large-4 columns"}
+             (dom/button #js {:className "tiny"
+                              :type "button"
+                              :onClick #(put! update
+                                              {:description (get-input-value (om/get-node owner "description"))
+                                               :time (get-input-value (om/get-node owner "time"))
+                                               :id (:id schedule)
+                                               :owner owner})}
+               "Salvar")
+             (dom/button #js {:className "tiny alert"
+                              :onClick #(om/set-state! owner :editing false)}
+               "Cancelar"))))
+       (dom/li nil (str (:description schedule) " - " (:time schedule) " ")
+         (dom/button #js {:className "tiny"
+                          :onClick #(om/set-state! owner :editing true)}
+           "Editar")
+         (dom/button #js {:className "tiny alert"
+                          :onClick #(put! delete schedule)}
+           "Remover"))))))
 
 (defn schedule-list [{:keys [days-of-the-week schedules]} owner]
   (reify
@@ -133,7 +167,7 @@
      {:description ""
       :time ""})
    om/IRenderState
-   (render-state [_ {:keys [add delete description time]}]
+   (render-state [_ {:keys [add delete update description time]}]
      (let [active-day (active-tab days-of-the-week)
            schedule-items (->> schedules
                                (filter (fn [{:keys [day_of_the_week]}]
@@ -142,7 +176,8 @@
          (apply dom/ul nil
                 (om/build-all schedule-line
                               schedule-items
-                              {:init-state {:delete delete}}))
+                              {:init-state {:delete delete
+                                            :update update}}))
          (dom/form nil
            (dom/fieldset nil
              (dom/legend nil "Inserir programação")
@@ -177,21 +212,39 @@
                                                  :owner owner})}
                  "Criar")))))))))
 
+(defn update-schedule [data args]
+  (let [active-day (active-tab (:days-of-the-week data))
+        schedule   (-> args
+                       (dissoc :owner)
+                       (assoc :day_of_the_week active-day))
+        owner      (:owner args)]
+    (om/transact! data
+                  :schedules
+                  (fn [schedules]
+                    (->> schedules
+                         (remove #(= (:id %) (:id schedule)))
+                         (conj schedule)
+                         (sort-schedules))))
+    (om/set-state! owner :editing false)))
+
 (defn schedule [data owner]
   (reify
    om/IInitState
    (init-state [_]
      {:add (chan)
-      :delete (chan)})
+      :delete (chan)
+      :update (chan)})
    om/IWillMount
    (will-mount [_]
      (let [add (om/get-state owner :add)
-           delete (om/get-state owner :delete)]
+           delete (om/get-state owner :delete)
+           update (om/get-state owner :update)]
        (go (while true
-             (let [[v c] (alts! [add delete])]
+             (let [[v c] (alts! [add delete update])]
                (condp = c
                  add (add-schedule data v)
-                 delete (delete-schedule data v)))))))
+                 delete (delete-schedule data v)
+                 update (update-schedule data v)))))))
    om/IRenderState
    (render-state [_ {:keys [add delete]}]
      (dom/div #js {:className "large-8 columns"}
@@ -201,7 +254,8 @@
                  {:schedules (:schedules data)
                   :days-of-the-week (:days-of-the-week data)}
                  {:init-state {:add add
-                               :delete delete}})))))
+                               :delete delete
+                               :update update}})))))
 
 (om/root
  schedule
