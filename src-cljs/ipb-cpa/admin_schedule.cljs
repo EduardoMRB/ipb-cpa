@@ -80,6 +80,20 @@
 (defn handle-change [e key owner]
   (om/set-state! owner key (get-input-value (.-target e))))
 
+(defn update-schedule
+  "Updates a schedule with new description and time attributes mantaining the id
+  and day_of_the_week fields as it is"
+  [data args]
+  (let [schedule   (-> args
+                       (dissoc :owner))
+        owner      (:owner args)]
+    (om/transact! data
+                  :schedules
+                  (fn [schedules]
+                    (let [scds (->> schedules
+                                    (remove #(= (:id %) (:id schedule))))]
+                      (vec (sort-schedules (conj scds schedule))))))
+    (om/set-state! owner :editing false)))
 
 ;; Om components
 (defn tab [[day active?] owner]
@@ -116,6 +130,10 @@
                           (:days-of-the-week data)
                           {:init-state {:active active}})))))
 
+;; TODO: Editing state is working correctly on lines in same tab but the state
+;; is getting messed up between tabs. Ex: if I edit a line on "Dom" tab then go
+;; to "Quin" tab and clicking on "Editar", the form will show informations of
+;; the first item  on "Dom" tab.
 (defn schedule-line [schedule owner]
   (reify
    om/IInitState
@@ -124,7 +142,7 @@
       :description (:description schedule)
       :time (:time schedule)})
    om/IRenderState
-   (render-state [_ {:keys [editing delete update description time]}]
+   (render-state [_ {:keys [editing delete update description time day]}]
      (if editing
        (dom/div #js {:className "large-12 columns"}
          (dom/div #js {:className "small-6 columns"}
@@ -147,7 +165,8 @@
                                               {:description (get-input-value (om/get-node owner "description"))
                                                :time (get-input-value (om/get-node owner "time"))
                                                :id (:id schedule)
-                                               :owner owner})}
+                                               :owner owner
+                                               :day_of_the_week day})}
                "Salvar")
              (dom/button #js {:className "tiny alert"
                               :onClick #(om/set-state! owner :editing false)}
@@ -177,7 +196,8 @@
                 (om/build-all schedule-line
                               schedule-items
                               {:init-state {:delete delete
-                                            :update update}}))
+                                            :update update
+                                            :day active-day}}))
          (dom/form nil
            (dom/fieldset nil
              (dom/legend nil "Inserir programação")
@@ -212,21 +232,6 @@
                                                  :owner owner})}
                  "Criar")))))))))
 
-(defn update-schedule [data args]
-  (let [active-day (active-tab (:days-of-the-week data))
-        schedule   (-> args
-                       (dissoc :owner)
-                       (assoc :day_of_the_week active-day))
-        owner      (:owner args)]
-    (om/transact! data
-                  :schedules
-                  (fn [schedules]
-                    (->> schedules
-                         (remove #(= (:id %) (:id schedule)))
-                         (conj schedule)
-                         (sort-schedules))))
-    (om/set-state! owner :editing false)))
-
 (defn schedule [data owner]
   (reify
    om/IInitState
@@ -246,7 +251,7 @@
                  delete (delete-schedule data v)
                  update (update-schedule data v)))))))
    om/IRenderState
-   (render-state [_ {:keys [add delete]}]
+   (render-state [_ {:keys [add delete update]}]
      (dom/div #js {:className "large-8 columns"}
        (dom/h2 nil "Schedule Component")
        (om/build tabs data)
