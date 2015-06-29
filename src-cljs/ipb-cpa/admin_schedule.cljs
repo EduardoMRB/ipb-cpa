@@ -116,13 +116,13 @@
         (while true
           (let [active-tab (<! active)]
             (om/transact! data
-                          (fn [app-state]
+                          :days-of-the-week
+                          (fn [dow]
                             (let [deactivated-dow (apply array-map
                                                          (flatten (map (fn [[day _]]
                                                                          [day false])
-                                                                    (:days-of-the-week app-state))))
-                                  new-dow (assoc deactivated-dow active-tab true)]
-                              (assoc app-state :days-of-the-week new-dow)))))))))
+                                                                    dow)))]
+                              (assoc deactivated-dow active-tab true)))))))))
    om/IRenderState
    (render-state [_ {:keys [active]}]
      (apply dom/ul #js {:className "tabs"}
@@ -156,7 +156,7 @@
              (dom/input #js {:type "text"
                              :ref "time"
                              :value time
-                             :onChange #(handle-change % :time owner )})))
+                             :onChange #(handle-change % :time owner)})))
          (dom/div #js {:className "row"}
            (dom/div #js {:className "large-offset-8 large-4 columns"}
              (dom/button #js {:className "tiny"
@@ -169,7 +169,10 @@
                                                :day_of_the_week day})}
                "Salvar")
              (dom/button #js {:className "tiny alert"
-                              :onClick #(om/set-state! owner :editing false)}
+                              :onClick (fn [_]
+                                         (om/set-state! owner :description (:description schedule))
+                                         (om/set-state! owner :time (:time schedule))
+                                         (om/set-state! owner :editing false))}
                "Cancelar"))))
        (dom/li nil (str (:description schedule) " - " (:time schedule) " ")
          (dom/button #js {:className "tiny"
