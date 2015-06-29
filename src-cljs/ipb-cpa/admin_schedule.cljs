@@ -93,7 +93,7 @@
                     (let [scds (->> schedules
                                     (remove #(= (:id %) (:id schedule))))]
                       (vec (sort-schedules (conj scds schedule))))))
-    (om/set-state! owner :editing false)))
+    (om/set-state! owner :editing? false)))
 
 ;; Om components
 (defn tab [[day active?] owner]
@@ -138,12 +138,12 @@
   (reify
    om/IInitState
    (init-state [_]
-     {:editing false
+     {:editing? false
       :description (:description schedule)
       :time (:time schedule)})
    om/IRenderState
-   (render-state [_ {:keys [editing delete update description time day]}]
-     (if editing
+   (render-state [_ {:keys [editing? delete update description time day]}]
+     (if editing?
        (dom/div #js {:className "large-12 columns"}
          (dom/div #js {:className "small-6 columns"}
            (dom/label nil "Nome"
@@ -172,11 +172,11 @@
                               :onClick (fn [_]
                                          (om/set-state! owner :description (:description schedule))
                                          (om/set-state! owner :time (:time schedule))
-                                         (om/set-state! owner :editing false))}
+                                         (om/set-state! owner :editing? false))}
                "Cancelar"))))
        (dom/li nil (str (:description schedule) " - " (:time schedule) " ")
          (dom/button #js {:className "tiny"
-                          :onClick #(om/set-state! owner :editing true)}
+                          :onClick #(om/set-state! owner :editing? true)}
            "Editar")
          (dom/button #js {:className "tiny alert"
                           :onClick #(put! delete schedule)}
