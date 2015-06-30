@@ -86,14 +86,14 @@
   [data args]
   (let [schedule   (-> args
                        (dissoc :owner))
-        owner      (:owner args)]
+        edit       (:edit args)]
     (om/transact! data
                   :schedules
                   (fn [schedules]
                     (let [scds (->> schedules
                                     (remove #(= (:id %) (:id schedule))))]
                       (vec (sort-schedules (conj scds schedule))))))
-    (om/set-state! owner :editing? false)))
+    (put! edit false)))
 
 ;; Om components
 (defn tab [[day active?] owner]
@@ -130,21 +130,15 @@
                           (:days-of-the-week data)
                           {:init-state {:active active}})))))
 
-;; TODO: Editing state is working correctly on lines in same tab but the state
-;; is getting messed up between tabs. Ex: if I edit a line on "Dom" tab then go
-;; to "Quin" tab and clicking on "Editar", the form will show informations of
-;; the first item  on "Dom" tab.
-(defn schedule-line [schedule owner]
+(defn edit-schedule-line [schedule owner]
   (reify
    om/IInitState
    (init-state [_]
-     {:editing? false
-      :description (:description schedule)
+     {:description (:description schedule)
       :time (:time schedule)})
    om/IRenderState
-   (render-state [_ {:keys [editing? delete update description time day]}]
-     (if editing?
-       (dom/div #js {:className "large-12 columns"}
+   (render-state [_ {:keys [description time update edit]}]
+     (dom/div #js {:className "large-12 columns"}
          (dom/div #js {:className "small-6 columns"}
            (dom/label nil "Nome"
              (dom/input #js {:type "text"
@@ -165,15 +159,34 @@
                                               {:description (get-input-value (om/get-node owner "description"))
                                                :time (get-input-value (om/get-node owner "time"))
                                                :id (:id schedule)
-                                               :owner owner
-                                               :day_of_the_week day})}
+                                               :day_of_the_week (:day_of_the_week schedule)
+                                               :edit edit})}
                "Salvar")
              (dom/button #js {:className "tiny alert"
-                              :onClick (fn [_]
-                                         (om/set-state! owner :description (:description schedule))
-                                         (om/set-state! owner :time (:time schedule))
-                                         (om/set-state! owner :editing? false))}
-               "Cancelar"))))
+                              :onClick #(put! edit false)}
+               "Cancelar")))))))
+
+;; TODO: Editing state is working correctly on lines in same tab but the state
+;; is getting messed up between tabs. Ex: if I edit a line on "Dom" tab then go
+;; to "Quin" tab and clicking on "Editar", the form will show informations of
+;; the first item  on "Dom" tab.
+(defn schedule-line [schedule owner]
+  (reify
+   om/IInitState
+   (init-state [_]
+     {:editing? false
+      :edit (chan)})
+   om/IWillMount
+   (will-mount [_]
+     (let [edit (om/get-state owner :edit)]
+       (go (while true
+             (let [editing? (<! edit)]
+               (om/set-state! owner :editing? editing?))))))
+   om/IRenderState
+   (render-state [_ {:keys [editing? delete update edit]}]
+     (if editing?
+       (om/build edit-schedule-line schedule {:init-state {:update update
+                                                           :edit edit}})
        (dom/li nil (str (:description schedule) " - " (:time schedule) " ")
          (dom/button #js {:className "tiny"
                           :onClick #(om/set-state! owner :editing? true)}
