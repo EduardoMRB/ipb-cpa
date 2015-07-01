@@ -21,8 +21,10 @@
                                          :dom false)}))
 
 ;; Ajax stuff
+(declare sort-schedules)
+
 (defn handler [resp]
-  (swap! app-state assoc :schedules resp))
+  (swap! app-state assoc :schedules (sort-schedules resp)))
 
 (defn err-handler [resp]
   (.log js/console "something went wrong" resp))
@@ -79,7 +81,11 @@
                (fn [schedules]
                  (vec (remove (partial = schedule) schedules)))))
 
-(defn add-schedule [data args]
+(defn add-schedule
+  "Adds a new schedule to the database, in case of errors, nothing is done,
+  otherwise, the id returned by the server is assoced into the new schedule and
+  it's added to the app-state"
+  [data args]
   (let [owner (:owner args)
         schedule (dissoc args :owner)
         success-c (chan)
@@ -91,7 +97,8 @@
          (condp = c
            success-c
            (let [new-schedule (assoc schedule :id (:schedule-id v))]
-             (om/transact! data :schedules #(sort-schedules (conj % new-schedule)))
+             (om/transact! data :schedules #(vec (sort-schedules
+                                                  (conj % new-schedule))))
              (om/set-state! owner :description "")
              (om/set-state! owner :time ""))
            failure-c
