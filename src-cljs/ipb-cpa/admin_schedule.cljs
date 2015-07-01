@@ -35,20 +35,27 @@
       :response-format :json
       :keywords? true})
 
+(defn resource-call [f url success-c failure-c & params]
+  (let [default-map {:handler #(put! success-c %)
+                     :error-handler #(put! failure-c %)
+                     :response-format :json
+                     :keywords? true}
+        params (if (seq params) (first params))
+        options (if params (assoc default-map :params params) default-map)]
+    (f url options)))
+
 (defn persist-schedule [schedule success-c failure-c]
-  (POST "/api/schedule"
-        {:params {:schedule schedule}
-         :handler #(put! success-c %)
-         :error-handler #(put! failure-c %)
-         :response-format :json
-         :keywords? true}))
+  (resource-call POST "/api/schedule" success-c failure-c {:schedule schedule}))
 
 (defn destroy-schedule [schedule-id success-c failure-c]
-  (DELETE (str "/api/schedule/" schedule-id)
-          {:handler #(put! success-c %)
-           :error-handler #(put! failure-c %)
-           :response-format :json
-           :keywords? true}))
+  (resource-call DELETE (str "/api/schedule/" schedule-id) success-c failure-c))
+
+(defn put-schedule [schedule success-c failure-c]
+  (resource-call PUT
+                 (str "/api/schedule/" (:id schedule))
+                 success-c
+                 failure-c
+                 {:schedule schedule}))
 
 ;; Util functions
 (defn tab-name [tab-keyword]
@@ -128,15 +135,28 @@
   and day_of_the_week fields as it is"
   [data args]
   (let [schedule   (-> args
-                       (dissoc :owner))
-        edit       (:edit args)]
-    (om/transact! data
-                  :schedules
-                  (fn [schedules]
-                    (let [scds (->> schedules
-                                    (remove #(= (:id %) (:id schedule))))]
-                      (vec (sort-schedules (conj scds schedule))))))
-    (put! edit false)))
+                       (dissoc :owner)
+                       (dissoc :edit))
+        edit       (:edit args)
+        success-c  (chan)
+        failure-c  (chan)
+        _          (put-schedule schedule success-c failure-c)]
+    (go
+     (while true
+       (let [[v c] (alts! [success-c failure-c])]
+         (condp = c
+           success-c
+           (do
+             (om/transact! data
+                           :schedules
+                           (fn [schedules]
+                             (let [scds (->> schedules
+                                             (remove #(= (:id %) (:id schedule))))]
+                               (vec (sort-schedules (conj scds schedule))))))
+             (put! edit false))
+           
+           failure-c
+           (.log js/console "Something went wrong" v)))))))
 
 ;; Om components
 (defn tab [[day active?] owner]

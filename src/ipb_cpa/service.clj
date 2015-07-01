@@ -38,6 +38,13 @@
     (database/remove-schedule! db (Integer/parseInt schedule-id))
     (ring-resp/response {:ok true})))
 
+(defn update-schedule [request]
+  (let [db (get-in request [:system :database :db])
+        schedule-id (get-in request [:path-params :id])
+        schedule (get-in request [:transit-params :schedule])]
+    (database/modify-schedule! db (Integer/parseInt schedule-id) schedule)
+    (ring-resp/response {:ok true})))
+
 (defroutes routes
   [[["/" {:get [:site#index home-page]}
      ^:interceptors [(body-params/body-params) bootstrap/html-body]
@@ -47,7 +54,8 @@
     ["/api" ^:interceptors [(body-params/body-params) bootstrap/json-body]
      ["/schedule" {:get [:api.schedule#index get-json-schedules]
                    :post [:api.schedule#create add-schedule]}
-      ["/:id" {:delete [:api.schedule#delete delete-schedule]}]]]]])
+      ["/:id" {:delete [:api.schedule#delete delete-schedule]
+               :put [:api.schedule#update update-schedule]}]]]]])
 
 ;; Consumed by ipb-cpa.server/create-server
 ;; See bootstrap/default-interceptors for additional options you can configure
