@@ -43,3 +43,12 @@
     (create-schedule-table! db)
     (add-schedule! db schedule)
     (get-schedule db 1)) => (assoc schedule :id 1))
+
+(fact "we can delete a schedule by id"
+  (with-db-transaction
+    [db memory-db]
+    (create-schedule-table! db)
+    (add-schedule! db schedule)
+    (add-schedule! db (assoc schedule :description "test"))
+    (remove-schedule! db 2)
+    (get-schedules db)) => [(assoc schedule :id 1)])

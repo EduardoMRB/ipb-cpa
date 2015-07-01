@@ -2,7 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om]
             [om.dom :as dom]
-            [ajax.core :refer [GET POST]]
+            [ajax.core :refer [GET POST DELETE PUT]]
             [cljs.core.async :as async :refer [chan put! <! >! alts!]]
             [clojure.string :as s]
             [cljs-time.core :as t]
@@ -43,6 +43,13 @@
          :response-format :json
          :keywords? true}))
 
+(defn destroy-schedule [schedule-id success-c failure-c]
+  (DELETE (str "/api/schedule/" schedule-id)
+          {:handler #(put! success-c %)
+           :error-handler #(put! failure-c %)
+           :response-format :json
+           :keywords? true}))
+
 ;; Util functions
 (defn tab-name [tab-keyword]
   (s/capitalize (s/replace (str tab-keyword) ":" "")))
@@ -62,7 +69,6 @@
 (defn sort-schedules
   "Sort schedules by time in ascending order."
   [schedules]
-  (prn schedules)
   (sort (fn [a b]
           (let [fmt (f/formatters :hour-minute)
                 a-time (f/parse fmt (:time a))
@@ -76,10 +82,20 @@
 (defn delete-schedule
   "Deletes passed shedules from the app-state"
   [data schedule]
-  (om/transact! data
-               :schedules
-               (fn [schedules]
-                 (vec (remove (partial = schedule) schedules)))))
+  (let [success-c (chan)
+        failure-c (chan)
+        _ (destroy-schedule (:id schedule) success-c failure-c)]
+    (go
+     (while true
+       (let [[v c] (alts! [success-c failure-c])]
+         (condp = c
+           success-c
+           (om/transact! data
+                         :schedules
+                         (fn [schedules]
+                           (vec (remove (partial = schedule) schedules))))
+           failure-c
+           (.log js/console "Something bad happened" v)))))))
 
 (defn add-schedule
   "Adds a new schedule to the database, in case of errors, nothing is done,

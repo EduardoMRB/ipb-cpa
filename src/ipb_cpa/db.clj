@@ -23,3 +23,5 @@
 
 (defn modify-schedule! [db schedule-id new-schedule]
   (apply update-schedule! db (as-vector new-schedule schedule-id)))
+
+(def remove-schedule! delete-schedule!)

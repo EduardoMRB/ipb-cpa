@@ -49,3 +49,8 @@ SET day_of_the_week = :day_of_the_week,
     description = :description,
     time = :time
 WHERE id = :id;
+
+-- name: delete-schedule!
+-- Deletes an schedule by id
+DELETE FROM schedule
+WHERE id = :id;
