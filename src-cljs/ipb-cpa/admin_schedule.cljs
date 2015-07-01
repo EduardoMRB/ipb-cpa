@@ -166,10 +166,6 @@
                               :onClick #(put! edit false)}
                "Cancelar")))))))
 
-;; TODO: Editing state is working correctly on lines in same tab but the state
-;; is getting messed up between tabs. Ex: if I edit a line on "Dom" tab then go
-;; to "Quin" tab and clicking on "Editar", the form will show informations of
-;; the first item  on "Dom" tab.
 (defn schedule-line [schedule owner]
   (reify
    om/IInitState

@@ -23,7 +23,6 @@
               ;; JavaScript resources.
               [:script {:src "/js/out/goog/base.js"}]
               [:script {:src "/js/app.js"}]
-              [:script "goog.require('ipb_cpa.core');"]
               scripts]]])))
 
 (defn schedule-index [db]

@@ -3,7 +3,7 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.7.0-RC1"]
+  :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "0.0-3308"]
                  [io.pedestal/pedestal.service "0.4.0"]
                  [org.omcljs/om "0.8.8"]
@@ -37,14 +37,21 @@
                  [com.stuartsierra/component "0.2.3"]
                  
                  [hiccup "1.0.5"]]
+  :clean-targets ^{:protect false} [:profile-path :compile-path "out" "resources/public/js/out"]
   :ragtime {:migrations ragtime.sql.files/migrations
             :database "jdbc:postgresql://localhost:5432/ipb?user=postgres&password=asdzxc"}
-  :plugins [[lein-cljsbuild "1.0.6"]
-            [ragtime/ragtime.lein "0.3.9"]]
+  :plugins [[lein-cljsbuild "1.0.5"]
+            [ragtime/ragtime.lein "0.3.9"]
+            [lein-figwheel "0.3.5"]]
+  :figwheel {:http-server-root "public"
+             :css-dirs ["resources/public/css"]
+             :nrepl-port 7888}
   :cljsbuild {:builds [{:id "dev"
                         :source-paths ["src-cljs"]
+                        :figwheel true
                         :compiler {:output-to "resources/public/js/app.js"
                                    :output-dir "resources/public/js/out"
+                                   :asset-path "js/out"
                                    :optimizations :none
                                    :pretty-print true}}]}
   :min-lein-version "2.0.0"
