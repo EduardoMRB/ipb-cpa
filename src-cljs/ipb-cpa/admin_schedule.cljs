@@ -209,29 +209,59 @@
                               :onClick #(put! edit false)}
                "Cancelar")))))))
 
+(defn delete-schedule-line [schedule owner]
+  (reify
+   om/IRenderState
+   (render-state [_ {:keys [delete-intent delete]}]
+     (dom/span nil "Deseja realmente remover essa programação? "
+       (dom/button #js {:type "button"
+                        :className "tiny alert"
+                        :onClick #(put! delete schedule)}
+         "Sim")
+       (dom/button #js {:type "button"
+                        :className "tiny"
+                        :onClick #(put! delete-intent false)}
+         "Não")))))
+
 (defn schedule-line [schedule owner]
   (reify
    om/IInitState
    (init-state [_]
      {:editing? false
-      :edit (chan)})
+      :delete? false
+      :edit (chan)
+      :delete-intent (chan)})
    om/IWillMount
    (will-mount [_]
-     (let [edit (om/get-state owner :edit)]
+     (let [edit (om/get-state owner :edit)
+           delete-intent (om/get-state owner :delete-intent)]
        (go (while true
-             (let [editing? (<! edit)]
-               (om/set-state! owner :editing? editing?))))))
+             (let [[v c] (alts! [edit delete-intent])]
+               (condp = c
+                 edit
+                 (om/set-state! owner :editing? v)
+                 
+                 delete-intent
+                 (om/set-state! owner :delete? v)))))))
    om/IRenderState
-   (render-state [_ {:keys [editing? delete update edit]}]
-     (if editing?
+   (render-state [_ {:keys [editing? delete? delete update edit delete-intent]}]
+     (cond
+       editing?
        (om/build edit-schedule-line schedule {:init-state {:update update
                                                            :edit edit}})
+       delete?
+       (om/build delete-schedule-line schedule {:init-state
+                                                {:delete-intent delete-intent
+                                                 :delete delete}})
+       :else
        (dom/li nil (str (:description schedule) " - " (:time schedule) " ")
          (dom/button #js {:className "tiny"
                           :onClick #(om/set-state! owner :editing? true)}
            "Editar")
          (dom/button #js {:className "tiny alert"
-                          :onClick #(put! delete schedule)}
+                          ;; :onClick #(put! delete schedule)
+                          :onClick #(om/set-state! owner :delete? true)
+                          }
            "Remover"))))))
 
 (defn schedule-list [{:keys [days-of-the-week schedules]} owner]
