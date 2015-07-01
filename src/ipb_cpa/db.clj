@@ -17,5 +17,9 @@
 (defn add-schedule! [db schedule]
   (apply insert-schedule! db (as-vector schedule)))
 
+(defn add-schedule<! [db schedule]
+  (let [res (apply insert-schedule<! db (as-vector schedule))]
+    (second (first res))))
+
 (defn modify-schedule! [db schedule-id new-schedule]
   (apply update-schedule! db (as-vector new-schedule schedule-id)))

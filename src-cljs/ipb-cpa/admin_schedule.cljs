@@ -2,7 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om]
             [om.dom :as dom]
-            [ajax.core :refer [GET]]
+            [ajax.core :refer [GET POST]]
             [cljs.core.async :as async :refer [chan put! <! >! alts!]]
             [clojure.string :as s]
             [cljs-time.core :as t]
@@ -33,6 +33,14 @@
       :response-format :json
       :keywords? true})
 
+(defn persist-schedule [schedule success-c failure-c]
+  (POST "/api/schedule"
+        {:params {:schedule schedule}
+         :handler #(put! success-c %)
+         :error-handler #(put! failure-c %)
+         :response-format :json
+         :keywords? true}))
+
 ;; Util functions
 (defn tab-name [tab-keyword]
   (s/capitalize (s/replace (str tab-keyword) ":" "")))
@@ -52,6 +60,7 @@
 (defn sort-schedules
   "Sort schedules by time in ascending order."
   [schedules]
+  (prn schedules)
   (sort (fn [a b]
           (let [fmt (f/formatters :hour-minute)
                 a-time (f/parse fmt (:time a))
@@ -72,10 +81,21 @@
 
 (defn add-schedule [data args]
   (let [owner (:owner args)
-        schedule (dissoc args :owner)]
-  (om/transact! data :schedules #(sort-schedules (conj % schedule)))
-  (om/set-state! owner :description "")
-  (om/set-state! owner :time "")))
+        schedule (dissoc args :owner)
+        success-c (chan)
+        failure-c (chan)
+        _ (persist-schedule schedule success-c failure-c)]
+    (go
+     (while true
+       (let [[v c] (alts! [success-c failure-c])]
+         (condp = c
+           success-c
+           (let [new-schedule (assoc schedule :id (:schedule-id v))]
+             (om/transact! data :schedules #(sort-schedules (conj % new-schedule)))
+             (om/set-state! owner :description "")
+             (om/set-state! owner :time ""))
+           failure-c
+           (.log js/console "something went wrong" v)))))))
 
 (defn handle-change [e key owner]
   (om/set-state! owner key (get-input-value (.-target e))))
