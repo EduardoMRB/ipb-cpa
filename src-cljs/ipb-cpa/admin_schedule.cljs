@@ -6,7 +6,9 @@
             [cljs.core.async :as async :refer [chan put! <! >! alts!]]
             [clojure.string :as s]
             [cljs-time.core :as t]
-            [cljs-time.format :as f]))
+            [cljs-time.format :as f]
+            [bouncer.core :as b]
+            [bouncer.validators :as v]))
 
 (enable-console-print!)
 
@@ -85,6 +87,20 @@
                   :else 0)))
         schedules))
 
+;; Validations
+(defn validate-schedule
+  "Validates a schedule and returns a vector where the first element contains
+  the validation errors or nil if the schedule is valid and the second element
+  is the updated schedules with or without errors inside the key
+  :bouncer.core/errors.
+
+  A valid schedule consist in a key :description that is required and the :time
+  which has the format of HH:MMh"
+  [schedule]
+  (b/validate schedule
+              :description [[v/required :message "A programação precisa ter um nome"]]
+              :time [[v/matches #"\d{2}:\d{2}h" :message "O horário precisa ter o formato: 13:30h"]]))
+
 ;; Component functions
 (defn delete-schedule
   "Deletes passed shedules from the app-state"
@@ -104,6 +120,11 @@
            failure-c
            (.log js/console "Something bad happened" v)))))))
 
+(defn reset-schedule-list-state! [owner]
+  (om/set-state! owner :description "")
+  (om/set-state! owner :time "")
+  (om/set-state! owner :errors {}))
+
 (defn add-schedule
   "Adds a new schedule to the database, in case of errors, nothing is done,
   otherwise, the id returned by the server is assoced into the new schedule and
@@ -111,21 +132,28 @@
   [data args]
   (let [owner (:owner args)
         schedule (dissoc args :owner)
-        success-c (chan)
-        failure-c (chan)
-        _ (persist-schedule schedule success-c failure-c)]
-    (go
-     (while true
-       (let [[v c] (alts! [success-c failure-c])]
-         (condp = c
-           success-c
-           (let [new-schedule (assoc schedule :id (:schedule-id v))]
-             (om/transact! data :schedules #(vec (sort-schedules
-                                                  (conj % new-schedule))))
-             (om/set-state! owner :description "")
-             (om/set-state! owner :time ""))
-           failure-c
-           (.log js/console "something went wrong" v)))))))
+        [errors schedule] (validate-schedule schedule)]
+    (cond
+      (seq errors) ;; Validation errors occurs.
+      (om/set-state! owner :errors errors)
+
+      :else ;; Schedule is valid, proceed.
+      (let [success-c (chan)
+            failure-c (chan)
+            _ (persist-schedule schedule success-c failure-c)]
+        (go
+         (while true
+           (let [[v c] (alts! [success-c failure-c])]
+             (condp = c
+               success-c
+               (let [new-schedule (assoc schedule :id (:schedule-id v))]
+                 ;; Add the database generated id into the schedule map and put
+                 ;; it into the app-state
+                 (om/transact! data :schedules #(vec (sort-schedules
+                                                      (conj % new-schedule))))
+                 (reset-schedule-list-state! owner))
+               failure-c
+               (.log js/console "something went wrong" v)))))))))
 
 (defn handle-change [e key owner]
   (om/set-state! owner key (get-input-value (.-target e))))
@@ -154,7 +182,7 @@
                                              (remove #(= (:id %) (:id schedule))))]
                                (vec (sort-schedules (conj scds schedule))))))
              (put! edit false))
-           
+
            failure-c
            (.log js/console "Something went wrong" v)))))))
 
@@ -260,7 +288,7 @@
                (condp = c
                  edit
                  (om/set-state! owner :editing? v)
-                 
+
                  delete-intent
                  (om/set-state! owner :delete? v)))))))
    om/IRenderState
@@ -289,9 +317,10 @@
    om/IInitState
    (init-state [_]
      {:description ""
-      :time ""})
+      :time ""
+      :errors {}})
    om/IRenderState
-   (render-state [_ {:keys [add delete update description time]}]
+   (render-state [_ {:keys [add delete update description time errors]}]
      (let [active-day (active-tab days-of-the-week)
            schedule-items (->> schedules
                                (filter (fn [{:keys [day_of_the_week]}]
@@ -315,7 +344,9 @@
                      (dom/input #js {:type "text"
                                      :ref "schedule-name"
                                      :value description
-                                     :onChange #(handle-change % :description owner)}))))
+                                     :onChange #(handle-change % :description owner)}))
+                   (if-let [[err-msg] (:description errors)]
+                     (dom/small #js {:className "error"} err-msg))))
                (dom/div #js {:className "large-6 columns"}
                  (dom/div #js {:className "row collapse postfix-radius"}
                    (dom/div #js {:className "small-9 columns"}
@@ -325,7 +356,9 @@
                                      :onChange #(handle-change % :time owner)}))
                    (dom/div #js {:className "small-3 columns"}
                      (dom/span #js {:className "postfix"}
-                       "Horário")))))
+                       "Horário"))
+                   (if-let [[err-msg] (:time errors)]
+                     (dom/small #js {:className "error"} err-msg)))))
              (dom/div #js {:className "large-2 large-offset-10 columns"}
                (dom/button #js {:className "small"
                                 :type "button"
