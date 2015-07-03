@@ -391,7 +391,6 @@
    om/IRenderState
    (render-state [_ {:keys [add delete update]}]
      (dom/div #js {:className "large-8 columns"}
-       (dom/h2 nil "Schedule Component")
        (om/build tabs data)
        (om/build schedule-list
                  {:schedules (:schedules data)
