@@ -21,6 +21,7 @@
 
                  [cheshire "5.5.0"]
                  [cljs-ajax "0.3.13"]
+                 [bouncer "0.3.3"]
 
                  [com.taoensso/carmine "2.10.0"]
 
@@ -35,7 +36,7 @@
                  [com.andrewmcveigh/cljs-time "0.3.7"]
 
                  [com.stuartsierra/component "0.2.3"]
-                 
+
                  [hiccup "1.0.5"]]
   :clean-targets ^{:protect false} [:profile-path :compile-path "out" "resources/public/js/out"]
   :ragtime {:migrations ragtime.sql.files/migrations
