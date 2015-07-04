@@ -166,25 +166,32 @@
                        (dissoc :owner)
                        (dissoc :edit))
         edit       (:edit args)
-        success-c  (chan)
-        failure-c  (chan)
-        _          (put-schedule schedule success-c failure-c)]
-    (go
-     (while true
-       (let [[v c] (alts! [success-c failure-c])]
-         (condp = c
-           success-c
-           (do
-             (om/transact! data
-                           :schedules
-                           (fn [schedules]
-                             (let [scds (->> schedules
-                                             (remove #(= (:id %) (:id schedule))))]
-                               (vec (sort-schedules (conj scds schedule))))))
-             (put! edit false))
+        owner      (:owner args)
+        [errors _] (validate-schedule schedule)]
+    (cond
+      (seq errors)
+      (om/set-state! owner :errors errors)
 
-           failure-c
-           (.log js/console "Something went wrong" v)))))))
+      :else
+      (let [success-c  (chan)
+            failure-c  (chan)
+            _          (put-schedule schedule success-c failure-c)]
+        (go
+         (while true
+           (let [[v c] (alts! [success-c failure-c])]
+             (condp = c
+               success-c
+               (do
+                 (om/transact! data
+                               :schedules
+                               (fn [schedules]
+                                 (let [scds (->> schedules
+                                                 (remove #(= (:id %) (:id schedule))))]
+                                   (vec (sort-schedules (conj scds schedule))))))
+                 (put! edit false))
+
+               failure-c
+               (.log js/console "Something went wrong" v)))))))))
 
 ;; Om components
 (defn tab [[day active?] owner]
@@ -220,28 +227,34 @@
             (om/build-all tab
                           (:days-of-the-week data)
                           {:init-state {:active active}})))))
+(defn error-message [errors k]
+  (if-let [[err-msg] (errors k)]
+    (dom/small #js {:className "error"} err-msg)))
 
 (defn edit-schedule-line [schedule owner]
   (reify
    om/IInitState
    (init-state [_]
      {:description (:description schedule)
-      :time (:time schedule)})
+      :time (:time schedule)
+      :errors {}})
    om/IRenderState
-   (render-state [_ {:keys [description time update edit]}]
+   (render-state [_ {:keys [description time update edit errors]}]
      (dom/div #js {:className "large-12 columns"}
          (dom/div #js {:className "small-6 columns"}
            (dom/label nil "Nome"
              (dom/input #js {:type "text"
                              :ref "description"
                              :value description
-                             :onChange #(handle-change % :description owner)})))
+                             :onChange #(handle-change % :description owner)}))
+           (error-message errors :description))
          (dom/div #js {:className "small-6 columns"}
            (dom/label nil "Horario"
              (dom/input #js {:type "text"
                              :ref "time"
                              :value time
-                             :onChange #(handle-change % :time owner)})))
+                             :onChange #(handle-change % :time owner)}))
+           (error-message errors :time))
          (dom/div #js {:className "row"}
            (dom/div #js {:className "large-offset-8 large-4 columns"}
              (dom/button #js {:className "tiny"
@@ -251,7 +264,8 @@
                                                :time (get-input-value (om/get-node owner "time"))
                                                :id (:id schedule)
                                                :day_of_the_week (:day_of_the_week schedule)
-                                               :edit edit})}
+                                               :edit edit
+                                               :owner owner})}
                "Salvar")
              (dom/button #js {:className "tiny alert"
                               :onClick #(put! edit false)}
