@@ -278,7 +278,9 @@
      (dom/span nil "Deseja realmente remover essa programação? "
        (dom/button #js {:type "button"
                         :className "tiny alert"
-                        :onClick #(put! delete schedule)}
+                        :onClick (fn [_]
+                                   (put! delete-intent false)
+                                   (put! delete schedule))}
          "Sim")
        (dom/button #js {:type "button"
                         :className "tiny"
