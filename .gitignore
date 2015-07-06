@@ -11,3 +11,4 @@ resources/public/css/app.css
 /.lein-env
 /figwheel_server.log
 /.idea
+/ipb_cpa.iml
