@@ -32,4 +32,5 @@ database credentials. After the previous step is done, you can run the migration
 
 ## Compile ClojureScript
 
-Only supported in dev environment `$ lein cljsbuild auto dev`
+This project uses figwheel. To run it use: `$ lein figwheel` or `$ rlwrap lein
+figwheel` if you have `rlwrap` installed.
