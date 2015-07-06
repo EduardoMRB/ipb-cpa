@@ -4,15 +4,15 @@ var gulp = require("gulp"),
 
 var paths = {
   scss: ["resources/public/scss/**/*.scss"],
+  scssManifesto: "resources/public/scss/app.scss",
   scssOut: "resources/public/css"
 };
 
 gulp.task("scss", function () {
-  gulp.src(paths.scss)
+  gulp.src(paths.scssManifesto)
     .pipe(sass({
       includePaths: ["bower_components/foundation/scss"]
     }))
-    .pipe(concat("app.css"))
     .pipe(gulp.dest(paths.scssOut));
 });
 
