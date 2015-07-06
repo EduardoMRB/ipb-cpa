@@ -1,9 +1,6 @@
-(ns ipb-cpa.site.view
+(ns ipb-cpa.view.layout
   (:require [hiccup.page :refer [html5]]
-            [io.pedestal.http.route :refer [url-for]]
-            [ipb-cpa.site.daily-verse :refer [get-verse]]
-            [ipb-cpa.site.schedule :as schedule]
-            [ipb-cpa.db :as db]))
+            [io.pedestal.http.route :refer [url-for]]))
 
 (defn menu []
   [:nav.top-nav.large-10.small-12.columns
@@ -20,7 +17,7 @@
     [:img {:src "images/ipb-logo-without-text.png"}]]
    (menu)])
 
-(defn layout [body]
+(defn default-template [body]
   (html5 {:lang "pt-br"}
          [:head
           [:title "Igreja Presbiteriana do CPA IV"]
@@ -50,44 +47,3 @@
            [:script {:src "js/out/goog/base.js"}]
            [:script {:src "js/app.js"}]
            [:script "goog.require('ipb_cpa.core');"]]]]))
-
-(defn random-verses []
-  [:div.small-12.large-6.small-collapse.columns
-   [:h2 "Versículo do dia"]
-   [:p (:text (get-verse))]
-   [:em (:reference (get-verse))]])
-
-(defn weekly-schedule [database]
-  [:div.small-12.large-6.columns
-   [:h2 "Programação Semanal"]
-   (schedule/get-schedule-view (db/get-schedules database))])
-
-(defn home-first-row [db]
-  [:div.columns
-   (weekly-schedule db)
-   (random-verses)])
-
-(defn index [db]
-  (layout (home-first-row db)))
-
-(defn contact []
-  (layout
-    (list
-      [:div.row
-       [:div.small-6.large-5.columns
-        [:h1 "Fale com o pastor"]
-        [:form {:method "POST"
-                :action ""}
-         [:div
-          [:label {:for "name"} "Nome"]
-          [:input#name {:type "text" :placeholder "Digite seu nome"}]]
-         [:div
-          [:label {:for "email"} "Email"]
-          [:input#email {:type "text" :placeholder "Digite seu email"}]]
-         [:div
-          [:label {:for "message"} "Mensagem"]
-          [:textarea#email {:placeholder "Digite sua mensagem"}]]
-         [:button.button "Enviar"]]]
-       [:div.small-6.large-offset-3.large-4.columns
-        [:h2 "Ipsum natus minus"]
-        [:p "Amet hic laborum corrupti laboriosam est quas, maxime pariatur! Illo adipisci repellat earum recusandae iste distinctio soluta sequi facilis, excepturi officia! Ad cupiditate perferendis sint dolore quisquam tempora accusantium, explicabo?"]]])))

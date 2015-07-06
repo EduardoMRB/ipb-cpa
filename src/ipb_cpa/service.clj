@@ -4,16 +4,17 @@
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.http.route.definition :refer [defroutes]]
             [ring.util.response :as ring-resp]
-            [ipb-cpa.site.view :as view]
+            [ipb-cpa.view.home :as home-view]
+            [ipb-cpa.view.contact :as contact-view]
             [ipb-cpa.view.admin-view :as admin-view]
             [ipb-cpa.db :as database]))
 
 (defn home-page [request]
   (let [db (get-in request [:system :database :db])]
-    (ring-resp/response (view/index db))))
+    (ring-resp/response (home-view/index db))))
 
 (defn contact-page [_]
-  (ring-resp/response (view/contact)))
+  (ring-resp/response (contact-view/contact)))
 
 (defn admin-login-page [_]
   (ring-resp/response "Login page!"))
