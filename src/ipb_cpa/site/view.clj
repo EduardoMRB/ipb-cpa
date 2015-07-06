@@ -36,10 +36,10 @@
             [:main.row.site-content
              body]
             ;; Site footer.
-            [:footer.row.site-footer
+            [:footer.site-footer
              [:h2 "Como chegar"]
              ;; Google Maps iframe.
-             [:div.large-12.medium-12.small-12.columns.google-maps
+             [:div.small-12.columns.google-maps
               [:iframe {:src "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d480.43820863243894!2d-56.036553589325415!3d-15.564608827688991!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0000000000000000%3A0x08cb3ad878331829!2s1%C2%B0+Igreja+Presbiteriana+do+CPA+4!5e0!3m2!1spt-BR!2sbr!4v1433469171863"
                         :width "1140"
                         :height "200"
@@ -62,7 +62,7 @@
    (schedule/get-schedule-view (db/get-schedules database))])
 
 (defn home-first-row [db]
-  [:div.row
+  [:div
    (weekly-schedule db)
    (random-verses)])
 
