@@ -6,7 +6,7 @@
             [ipb-cpa.db :as db]))
 
 (defn menu []
-  [:nav.top-nav.large-10.columns
+  [:nav.top-nav.large-10.small-12.columns
    [:ul.top-menu
     [:li [:a {:href "#"} "Sobre"]]
     [:li [:a {:href "#"} "Programação"]]
@@ -16,8 +16,8 @@
 
 (defn header []
   [:div.row.site-header
-   [:a.large-2.columns {:href (url-for :site#index)}
-    [:img {:src "images/ipb-logo.png"}]]
+   [:a.large-2.large-offset-0.small-offset-3.small-6.columns {:href (url-for :site#index)}
+    [:img {:src "images/ipb-logo-without-text.png"}]]
    (menu)])
 
 (defn layout [body]
@@ -39,11 +39,12 @@
             [:footer.row.site-footer
              [:h2 "Como chegar"]
              ;; Google Maps iframe.
-             [:iframe {:src "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d480.43820863243894!2d-56.036553589325415!3d-15.564608827688991!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0000000000000000%3A0x08cb3ad878331829!2s1%C2%B0+Igreja+Presbiteriana+do+CPA+4!5e0!3m2!1spt-BR!2sbr!4v1433469171863"
-                       :width "1140"
-                       :height "200"
-                       :frameborder "0"
-                       :style "border:0"}]]
+             [:div.large-12.medium-12.small-12.columns.google-maps
+              [:iframe {:src "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d480.43820863243894!2d-56.036553589325415!3d-15.564608827688991!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0000000000000000%3A0x08cb3ad878331829!2s1%C2%B0+Igreja+Presbiteriana+do+CPA+4!5e0!3m2!1spt-BR!2sbr!4v1433469171863"
+                        :width "1140"
+                        :height "200"
+                        :frameborder "0"
+                        :style "border:0"}]]]
            ;; JavaScript resources.
            [:script {:src "js/out/goog/base.js"}]
            [:script {:src "js/app.js"}]
