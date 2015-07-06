@@ -10,3 +10,4 @@ resources/public/css/app.css
 /node_modules
 /.lein-env
 /figwheel_server.log
+/.idea
