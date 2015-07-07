@@ -49,3 +49,8 @@
       (get-in resp [:headers "Content-Type"]) => "application/json;charset=UTF-8")
     (fact "returns schedules in body"
       (:body resp) => "[]")))
+
+(facts admin-videos-page
+  (fact "content-type is html"
+    (get-in (response-for service :get "/admin/video")
+            [:headers "Content-Type"]) => "text/html;charset=UTF-8"))

@@ -23,6 +23,10 @@
   (let [db (get-in request [:system :database :db])]
     (ring-resp/response (admin-view/schedule-index db))))
 
+(defn admin-video-page [request]
+  (let [db (get-in request [:system :database :db])]
+    (ring-resp/response (admin-view/video-index db))))
+
 (defn get-json-schedules [request]
   (let [db (get-in request [:system :database :db])]
     (ring-resp/response (database/get-schedules db))))
@@ -51,7 +55,8 @@
      {:get [:site#index home-page]}
      ["/contato" {:get [:site#contact contact-page]}]
      ["/admin" {:get [:admin#login admin-login-page]}
-      ["/schedule" {:get [:admin.schedule#index admin-schedule-page]}]]]
+      ["/schedule" {:get [:admin.schedule#index admin-schedule-page]}]
+      ["/video" {:get [:admin.video#index admin-video-page]}]]]
     ["/api" ^:interceptors [(body-params/body-params) bootstrap/json-body]
      ["/schedule" {:get [:api.schedule#index get-json-schedules]
                    :post [:api.schedule#create add-schedule]}

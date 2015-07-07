@@ -8,6 +8,7 @@
                  [io.pedestal/pedestal.service "0.4.0"]
                  [org.omcljs/om "0.8.8"]
                  [com.cemerick/clojurescript.test "0.3.3"]
+                 [sablono "0.3.4"]
 
                  ;; Remove this line and uncomment one of the next lines to
                  ;; use Immutant or Tomcat instead of Jetty:
