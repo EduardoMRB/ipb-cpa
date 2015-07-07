@@ -7,6 +7,7 @@
                  [org.clojure/clojurescript "0.0-3308"]
                  [io.pedestal/pedestal.service "0.4.0"]
                  [org.omcljs/om "0.8.8"]
+                 [com.cemerick/clojurescript.test "0.3.3"]
 
                  ;; Remove this line and uncomment one of the next lines to
                  ;; use Immutant or Tomcat instead of Jetty:
