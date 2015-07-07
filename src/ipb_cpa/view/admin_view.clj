@@ -29,6 +29,3 @@
   (layout {:body (list [:h1 "Programacao - Admin"]
                        [:div#schedule-component.row])
            :scripts [:script "goog.require('ipb_cpa.admin_schedule');"]}))
-
-(defn json-schedules [database]
-  (json/generate-string (db/get-schedules database)))

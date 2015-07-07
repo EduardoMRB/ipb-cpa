@@ -25,7 +25,7 @@
 
 (defn get-json-schedules [request]
   (let [db (get-in request [:system :database :db])]
-    (ring-resp/response (admin-view/json-schedules db))))
+    (ring-resp/response (database/get-schedules db))))
 
 (defn add-schedule [request]
   (let [db (get-in request [:system :database :db])
@@ -47,8 +47,8 @@
     (ring-resp/response {:ok true})))
 
 (defroutes routes
-  [[["/" {:get [:site#index home-page]}
-     ^:interceptors [(body-params/body-params) bootstrap/html-body]
+  [[["/" ^:interceptors [(body-params/body-params) bootstrap/html-body]
+     {:get [:site#index home-page]}
      ["/contato" {:get [:site#contact contact-page]}]
      ["/admin" {:get [:admin#login admin-login-page]}
       ["/schedule" {:get [:admin.schedule#index admin-schedule-page]}]]]

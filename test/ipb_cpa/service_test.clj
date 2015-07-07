@@ -6,30 +6,22 @@
             [com.stuartsierra.component :as component]
             [environ.core :refer [env]]
             [ipb-cpa.service :as service]
-            [ipb-cpa.server :as server]))
+            [ipb-cpa.server :as server]
+            [ipb-cpa.system :as system]))
 
 ;; Test system.
-(defrecord TestDatabase [subprotocol subname]
-  component/Lifecycle
-  (start [component]
-    (assoc component :db {:subprotocol subprotocol
-                          :subname subname}))
-  (stop [component]
-    (dissoc component :db)))
-
-(def test-system
-  (component/system-map
-   :database (->TestDatabase "sqlite" ":memory:")))
-
 (def test-system-interceptor
   (interceptor/on-request
    (fn [request]
-     (assoc request :system (component/start test-system)))))
+     (let [smap (system/system (env :test-db-connection-uri))]
+       (assoc request :system (component/start smap))))))
 
 (def service
-  (::bootstrap/service-fn (-> service/service
-                              (server/attach-interceptor test-system-interceptor)
-                              bootstrap/create-servlet)))
+  (-> service/service
+      bootstrap/default-interceptors
+      (server/attach-interceptor test-system-interceptor)
+      bootstrap/service-fn
+      ::bootstrap/service-fn))
 
 ;; Tests.
 (facts home-page-test
@@ -42,3 +34,18 @@
       (:status cont-resp) => 200)
     (fact "contact page content is html"
       (get-in cont-resp [:headers "Content-Type"]) => "text/html;charset=UTF-8")))
+
+(facts "admin"
+  (let [resp (response-for service :get "/admin")]
+    (fact "admin login page is html"
+      (get-in resp
+              [:headers "Content-Type"]) => "text/html;charset=UTF-8")
+    (fact "admin login page contains the word 'Login'"
+      (:body resp) => (contains "Login"))))
+
+(facts schedule-json-api
+  (let [resp (response-for service :get "/api/schedule")]
+    (fact "handler returns json"
+      (get-in resp [:headers "Content-Type"]) => "application/json;charset=UTF-8")
+    (fact "returns schedules in body"
+      (:body resp) => "[]")))
