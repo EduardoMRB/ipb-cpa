@@ -143,6 +143,22 @@
                                     (reset-video-state! owner))))}
            "Criar"]]]]))))
 
+(defn video-entry [video owner]
+  (reify
+   om/IRender
+   (render [_]
+     (html
+       [:li (:title video)
+        [:em (:date video)]]))))
+
+(defn video-list [videos owner]
+  (reify
+   om/IRender
+   (render [_]
+     (html
+       [:ul
+        (om/build-all video-entry videos)]))))
+
 (defn video [data owner]
   (reify
    om/IRender
@@ -150,6 +166,8 @@
      (html
        [:div
         [:h2 "Video component"]
+        [:div
+         (om/build video-list (:videos data))]
         [:div
          (om/build new-video data)]]))))
 
