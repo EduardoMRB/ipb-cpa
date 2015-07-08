@@ -6,7 +6,7 @@
             [cljs.core.async :as async :refer [chan put! <! >! alts!]]
             [ipb-cpa.helper :as helper]
             [bouncer.core :as b]
-            [boucner.validators :as v]))
+            [bouncer.validators :as v]))
 
 (enable-console-print!)
 
