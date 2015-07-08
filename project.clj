@@ -50,7 +50,7 @@
              :css-dirs ["resources/public/css"]
              :nrepl-port 7888}
   :cljsbuild {:builds [{:id "dev"
-                        :source-paths ["src-cljs"]
+                        :source-paths ["src-cljs" "test-cljs"]
                         :figwheel true
                         :compiler {:output-to "resources/public/js/app.js"
                                    :output-dir "resources/public/js/out"
