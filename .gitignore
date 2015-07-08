@@ -3,6 +3,7 @@ tmp/
 logs/
 /.lein-repl-history
 /.nrepl-port
+/.lein-failures
 resources/public/js/out/
 resources/public/js/app.js
 resources/public/css/app.css
