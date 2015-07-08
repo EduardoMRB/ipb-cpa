@@ -10,7 +10,7 @@
 
 (enable-console-print!)
 
-(def app-state (atom {}))
+(def app-state (atom {:videos []}))
 
 ;; =============================================================================
 ;; Validation
@@ -52,6 +52,14 @@
                    "Código de incorporação inválido")]
     (om/set-state! owner :embedded-iframe embedded)
     (om/set-state! owner :embedded-error error)))
+
+(defn reset-video-state! [owner]
+  (om/set-state! owner :embedded-iframe "")
+  (om/set-state! owner :embedded-error "")
+  (om/set-state! owner :title "")
+  (om/set-state! owner :date "")
+  (om/set-state! owner :excerpt "")
+  (om/set-state! owner :active? ""))
 
 ;; =============================================================================
 ;; Components
@@ -121,15 +129,18 @@
                                                  embedded-iframe)}}]]]
          [:div.row
           [:button.small.right {:type "button"
-                    :on-click (fn [e]
-                                (let [[errors video] (validate-video
-                                                      {:title title
-                                                       :date date
-                                                       :excerpt excerpt
-                                                       :embedded-iframe embedded-iframe
-                                                       :active? active?})]
-                                  (if (seq errors)
-                                    (om/set-state! owner :errors errors))))}
+                    :on-click (fn [_]
+                                (let [video {:title title
+                                             :date date
+                                             :excerpt excerpt
+                                             :embedded-iframe embedded-iframe
+                                             :active? active?}
+                                      [errors _] (validate-video video)
+                                      errors (if (seq errors) errors {})]
+                                  (om/set-state! owner :errors errors)
+                                  (when-not (seq errors)
+                                    (om/transact! data :videos #(conj % video))
+                                    (reset-video-state! owner))))}
            "Criar"]]]]))))
 
 (defn video [data owner]
