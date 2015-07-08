@@ -56,7 +56,10 @@
                                    :output-dir "resources/public/js/out"
                                    :asset-path "js/out"
                                    :optimizations :none
-                                   :pretty-print true}}]}
+                                   :pretty-print true}}]
+              :test-commands {"phantom" ["phantomjs"
+                                         "resources/public/js/out/goog/base.js"
+                                         "resources/public/js/app.js"]}}
   :min-lein-version "2.0.0"
   :resource-paths ["config", "resources"]
   :profiles {:dev {:aliases {"run-dev" ["trampoline" "run" "-m" "ipb-cpa.server/run-dev"]}
