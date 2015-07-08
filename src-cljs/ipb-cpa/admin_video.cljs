@@ -4,14 +4,24 @@
             [sablono.core :as html :refer-macros [html]]
             [ajax.core :refer [GET POST PUT DELETE]]
             [cljs.core.async :as async :refer [chan put! <! >! alts!]]
-            [ipb-cpa.helper :as helper]))
+            [ipb-cpa.helper :as helper]
+            [bouncer.core :as b]
+            [boucner.validators :as v]))
 
 (enable-console-print!)
 
 (def app-state (atom {}))
 
+;; =============================================================================
+;; Validation
+;; =============================================================================
+
 (defn embedded-valid? [embedded]
   (re-matches #"<iframe([^>]+)></iframe>" embedded))
+
+;; =============================================================================
+;; Component functions
+;; =============================================================================
 
 (defn set-embedded-iframe [owner e]
   (let [embedded (-> e .-target .-value)
@@ -20,6 +30,10 @@
                    "Código de incorporação inválido")]
     (om/set-state! owner :embedded-iframe embedded)
     (om/set-state! owner :embedded-error error)))
+
+;; =============================================================================
+;; Components
+;; =============================================================================
 
 (defn new-video [data owner]
   (reify
@@ -78,8 +92,7 @@
                                                  embedded-iframe)}}]]]
          [:div.row
           [:button.small.right {:type "button"
-                    :on-click #(.log js/console "new-button clicked")
-                    :ref "new-button"}
+                    :on-click #(.log js/console "new-button clicked")}
            "Criar"]]]]))))
 
 (defn video [data owner]
@@ -91,6 +104,10 @@
         [:h2 "Video component"]
         [:div
          (om/build new-video data)]]))))
+
+;; =============================================================================
+;; Om root
+;; =============================================================================
 
 (om/root video
          app-state

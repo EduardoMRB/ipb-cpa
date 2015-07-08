@@ -23,7 +23,9 @@
                                          :sab false
                                          :dom false)}))
 
+;; =============================================================================
 ;; Ajax stuff
+;; =============================================================================
 (declare sort-schedules)
 
 (defn handler [resp]
@@ -60,7 +62,9 @@
                  failure-c
                  {:schedule schedule}))
 
+;; =============================================================================
 ;; Util functions
+;; =============================================================================
 (defn tab-name [tab-keyword]
   (s/capitalize (s/replace (str tab-keyword) ":" "")))
 
@@ -85,7 +89,9 @@
                   :else 0)))
         schedules))
 
+;; =============================================================================
 ;; Validations
+;; =============================================================================
 (defn validate-schedule
   "Validates a schedule and returns a vector where the first element contains
   the validation errors or nil if the schedule is valid and the second element
@@ -99,7 +105,9 @@
               :description [[v/required :message "A programação precisa ter um nome"]]
               :time [[v/matches #"\d{2}:\d{2}h" :message "O horário precisa ter o formato: 13:30h"]]))
 
-;; Component functions
+;; =============================================================================
+;; Components
+;; =============================================================================
 (defn delete-schedule
   "Deletes passed shedules from the app-state"
   [data schedule]
@@ -412,6 +420,9 @@
                  {:init-state {:add add
                                :delete delete
                                :update update}})))))
+;; =============================================================================
+;; Om root
+;; =============================================================================
 
 (om/root
  schedule
