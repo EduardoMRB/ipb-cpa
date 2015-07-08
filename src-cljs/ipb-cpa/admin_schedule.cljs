@@ -8,7 +8,8 @@
             [cljs-time.core :as t]
             [cljs-time.format :as f]
             [bouncer.core :as b]
-            [bouncer.validators :as v]))
+            [bouncer.validators :as v]
+            [ipb-cpa.helper :as helper :refer [get-input-value]]))
 
 (enable-console-print!)
 
@@ -62,9 +63,6 @@
 ;; Util functions
 (defn tab-name [tab-keyword]
   (s/capitalize (s/replace (str tab-keyword) ":" "")))
-
-(defn get-input-value [input]
-  (.-value input))
 
 (defn active-tab [days-of-week]
   (let [mappings {:seg "Segunda" :ter "Terça" :quar "Quarta" :quin "Quinta"
