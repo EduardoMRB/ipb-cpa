@@ -190,7 +190,8 @@
    (render [_]
      (html
        [:div
-        [:h2 "Video component"]
+        [:div.row
+         [:h2 "Vídeos"]]
         [:div.row
          (om/build video-list (:videos data))]
         [:div.row
