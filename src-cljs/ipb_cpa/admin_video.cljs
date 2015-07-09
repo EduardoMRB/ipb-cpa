@@ -175,58 +175,63 @@
       :errors {}})
    om/IRenderState
    (render-state [_ {:keys [embedded-iframe embedded-error title date excerpt
-                            active? errors]}]
+                            active? errors editing]}]
      (html
        [:div.columns
-       [:form
-        [:div.row
-         [:div.small-6.columns
-          [:label "Título"
-           [:input {:type "text"
-                    :value title
-                    :on-change #(helper/update-owner-state! owner :title %)}]]
-          (helper/error-message-for errors :title)]
-         [:div.small-6.columns
-          [:label "Data"
-           [:input {:type "text"
-                    :value date
-                    :on-change #(helper/update-owner-state! owner :date %)}]]
-          (helper/error-message-for errors :date)]]
-        [:div.row
-         [:div.small-12.columns
-          [:label "Resumo"
-           [:textarea {:on-change #(helper/update-owner-state! owner :excerpt %)
-                       :rows 10
-                       :value excerpt}]]
-          (helper/error-message-for errors :excerpt)]]
-        [:div.row.collapse
-         [:div.small-6.columns
-          [:div.small-12.columns
-           [:label "Incorporar"
+        [:form
+         [:div.row
+          [:div.small-6.columns
+           [:label "Título"
             [:input {:type "text"
-                     :value embedded-iframe
-                     :on-change #(set-embedded-iframe owner %)}]]
-           (helper/error-message-for errors :embedded-iframe)]
+                     :value title
+                     :on-change #(helper/update-owner-state! owner :title %)}]]
+           (helper/error-message-for errors :title)]
+          [:div.small-6.columns
+           [:label "Data"
+            [:input {:type "text"
+                     :value date
+                     :on-change #(helper/update-owner-state! owner :date %)}]]
+           (helper/error-message-for errors :date)]]
+         [:div.row
           [:div.small-12.columns
-           [:label "Ativo?"]
-           [:div.switch
-            [:input#active {:type "checkbox"
-                            :checked active?
-                            :on-change #(om/set-state! owner
-                                                       :active?
-                                                       (not active?))}]
-            [:label {:for "active"}]]
-           (helper/error-message-for errors :active?)]]
-         [:div.small-6.columns
-          [:label "Preview do video"]
-          [:div.flex-video.widescreen.youtube
-           {:dangerouslySetInnerHTML {:__html (if (seq embedded-error)
-                                                embedded-error
-                                                embedded-iframe)}}]]]
-        [:div.columns
-         [:button.small.right {:type "button"
-                               :on-click #(.log js/console "editing")}
-          "Salvar"]]]]))))
+           [:label "Resumo"
+            [:textarea {:on-change #(helper/update-owner-state! owner :excerpt %)
+                        :rows 10
+                        :value excerpt}]]
+           (helper/error-message-for errors :excerpt)]]
+         [:div.row.collapse
+          [:div.small-6.columns
+           [:div.small-12.columns
+            [:label "Incorporar"
+             [:input {:type "text"
+                      :value embedded-iframe
+                      :on-change #(set-embedded-iframe owner %)}]]
+            (helper/error-message-for errors :embedded-iframe)]
+           [:div.small-12.columns
+            [:label "Ativo?"]
+            [:div.switch
+             [:input#active {:type "checkbox"
+                             :checked active?
+                             :on-change #(om/set-state! owner
+                                                        :active?
+                                                        (not active?))}]
+             [:label {:for "active"}]]
+            (helper/error-message-for errors :active?)]]
+          [:div.small-6.columns
+           [:label "Preview do video"]
+           [:div.flex-video.widescreen.youtube
+            {:dangerouslySetInnerHTML {:__html (if (seq embedded-error)
+                                                 embedded-error
+                                                 embedded-iframe)}}]]]
+         [:div.columns
+          [:div.right
+           [:button.small.alert {:type "button"
+                                 :on-click #(put! editing false)}
+            "Cancelar"]
+           [:button.small {:type "button"
+                           :on-click #(.log js/console "editing")}
+            "Salvar"]]
+          ]]]))))
 
 (defn collapsed-row [video owner]
   (reify
@@ -246,14 +251,21 @@
   (reify
    om/IInitState
    (init-state [_]
-     {:editing? false})
+     {:editing? false
+      :editing (chan)})
+   om/IWillMount
+   (will-mount [_]
+     (let [editing (om/get-state owner :editing)]
+       (go
+        (while true
+          (om/set-state! owner :editing? (<! editing))))))
    om/IRenderState
-   (render-state [_ {:keys [editing?]}]
+   (render-state [_ {:keys [editing? editing]}]
      (html
        [:div.video-wrapper
         {:on-click #(om/set-state! owner :editing? (complement editing?))}
         (if editing?
-          (om/build expanded-row video)
+          (om/build expanded-row video {:init-state {:editing editing}})
           (om/build collapsed-row video))]))))
 
 (defn video-list [videos owner]
