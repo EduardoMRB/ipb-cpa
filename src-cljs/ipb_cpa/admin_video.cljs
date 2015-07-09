@@ -174,7 +174,7 @@
         [:div.small-8.columns.content-holder
          [:span.bottom-text (:title video)]]
         [:div.small-2.columns.content-holder
-         [:span.bottom-text (br-date (:date video))]]]))))
+         [:span.bottom-text.light (br-date (:date video))]]]))))
 
 (defn video-list [videos owner]
   (reify
