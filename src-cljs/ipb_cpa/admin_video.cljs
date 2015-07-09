@@ -146,7 +146,7 @@
             {:dangerouslySetInnerHTML {:__html (if (seq embedded-error)
                                                  embedded-error
                                                  embedded-iframe)}}]]]
-         [:div.row
+         [:div.columns
           [:button.small.right {:type "button"
                     :on-click (fn [_]
                                 (let [video {:title title
@@ -193,7 +193,7 @@
         [:h2 "Video component"]
         [:div.row
          (om/build video-list (:videos data))]
-        [:div
+        [:div.row
          (om/build new-video data)]]))))
 
 ;; =============================================================================
