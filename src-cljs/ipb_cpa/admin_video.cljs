@@ -6,11 +6,26 @@
             [cljs.core.async :as async :refer [chan put! <! >! alts!]]
             [ipb-cpa.helper :as helper]
             [bouncer.core :as b]
-            [bouncer.validators :as v]))
+            [bouncer.validators :as v]
+            [cljs-time.format :as f]))
 
 (enable-console-print!)
 
-(def app-state (atom {:videos []}))
+(def app-state
+  (atom {:videos [{:title "Literatura e Cristianismo"
+                   :date "2015-11-11"
+                   :excerpt "Literatura e Cristianiso soa assuntos nao tao distantes como a
+                            maioria gosta de pensar, nesse video veremos um pouco sobre a
+                            historia do cristianismo na literatura"
+                   :embedded-iframe "<iframe width=\"420\" height=\"315\" src=\"https://www.youtube.com/embed/5jpRRcoeQ2Y\" frameborder=\"0\" allowfullscreen></iframe>"
+                   :active? true}
+                  {:title "Literatura e Cristianismo"
+                   :date "2015-04-11"
+                   :excerpt "Literatura e Cristianiso soa assuntos nao tao distantes como a
+                            maioria gosta de pensar, nesse video veremos um pouco sobre a
+                            historia do cristianismo na literatura"
+                   :embedded-iframe "<iframe width=\"420\" height=\"315\" src=\"https://www.youtube.com/embed/5jpRRcoeQ2Y\" frameborder=\"0\" allowfullscreen></iframe>"
+                   :active? false}]}))
 
 ;; =============================================================================
 ;; Validation
@@ -60,6 +75,10 @@
   (om/set-state! owner :date "")
   (om/set-state! owner :excerpt "")
   (om/set-state! owner :active? ""))
+
+(defn br-date [date]
+  (let [date (f/parse date)]
+    (f/unparse (f/formatter "dd/MM/yyyy") date)))
 
 ;; =============================================================================
 ;; Components
@@ -143,21 +162,27 @@
                                     (reset-video-state! owner))))}
            "Criar"]]]]))))
 
-(defn video-entry [video owner]
+(defn video-row [video owner]
   (reify
    om/IRender
    (render [_]
      (html
-       [:li (:title video)
-        [:em (:date video)]]))))
+       [:div.video-row.small-12.columns
+        [:div.status {:class (if (:active? video) "active" "inactive")}]
+        [:div.small-2.columns.content-holder
+         [:img.img-icon.small-3.columnns {:src "/images/video-icon.png"}]]
+        [:div.small-8.columns.content-holder
+         [:span.bottom-text (:title video)]]
+        [:div.small-2.columns.content-holder
+         [:span.bottom-text (br-date (:date video))]]]))))
 
 (defn video-list [videos owner]
   (reify
    om/IRender
    (render [_]
      (html
-       [:ul
-        (om/build-all video-entry videos)]))))
+       [:div.video-list.columns
+        (om/build-all video-row videos)]))))
 
 (defn video [data owner]
   (reify
@@ -166,7 +191,7 @@
      (html
        [:div
         [:h2 "Video component"]
-        [:div
+        [:div.row
          (om/build video-list (:videos data))]
         [:div
          (om/build new-video data)]]))))

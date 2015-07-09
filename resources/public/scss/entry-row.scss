@@ -1,0 +1,42 @@
+.video-list {
+  width: 100%;
+  padding: 0;
+  background: $white;
+  box-shadow: $input-border-color 1px 1px 7px 0px;
+
+  .video-row {
+    padding: 0;
+    height: 70px;
+    cursor: pointer;
+    border: 1px solid $input-border-color;
+
+    .status {
+      width: 5px;
+      height: 100%;
+      position: absolute;
+      left: 0;
+
+      &.active {
+        background-color: $success-color;
+      }
+
+      &.inactive {
+        background-color: $alert-color;
+      }
+    }
+  }
+}
+
+.img-icon {
+  width: 50px;
+}
+
+.bottom-text {
+  position: absolute;
+  bottom: 0;
+}
+
+.content-holder {
+  height: 37px;
+  margin-top: 15px;
+}
