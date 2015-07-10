@@ -11,6 +11,7 @@
 
 (enable-console-print!)
 
+(def ESC-CODE 27)
 (def app-state
   (atom {:videos [{:title "Literatura e Cristianismo"
                    :date "2015-11-11"
@@ -79,6 +80,12 @@
 (defn br-date [date]
   (let [date (f/parse date)]
     (f/unparse (f/formatter "dd/MM/yyyy") date)))
+
+(defn collapse-on-key [key-code ch]
+  (fn [e]
+    (if (= (.-keyCode e) key-code)
+      (put! ch false))))
+
 
 ;; =============================================================================
 ;; Components
@@ -173,6 +180,14 @@
       :excerpt (:excerpt video)
       :active? (:active? video)
       :errors {}})
+   om/IDidMount
+   (did-mount [_]
+     ;; 
+     (let [body (.-body js/document)]
+       (.addEventListener body
+                          "keyup"
+                          (collapse-on-key ESC-CODE
+                                           (om/get-state owner :editing)))))
    om/IRenderState
    (render-state [_ {:keys [embedded-iframe embedded-error title date excerpt
                             active? errors editing]}]
