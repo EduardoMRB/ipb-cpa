@@ -348,7 +348,7 @@
                                (filter (fn [{:keys [day_of_the_week]}]
                                          (= active-day day_of_the_week))))]
        (dom/div #js {:className "row"}
-         (apply dom/ul nil
+         (apply dom/ul #js {:className "no-bullet"}
                 (om/build-all schedule-line
                               schedule-items
                               {:init-state {:delete delete
@@ -413,6 +413,7 @@
    om/IRenderState
    (render-state [_ {:keys [add delete update]}]
      (dom/div #js {:className "large-8 columns"}
+       (dom/h1 nil "Programação")
        (om/build tabs data)
        (om/build schedule-list
                  {:schedules (:schedules data)
