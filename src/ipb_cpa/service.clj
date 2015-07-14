@@ -17,7 +17,7 @@
   (ring-resp/response (contact-view/contact)))
 
 (defn admin-login-page [_]
-  (ring-resp/response "Login page!"))
+  (ring-resp/response (admin-view/login-page)))
 
 (defn admin-schedule-page [request]
   (let [db (get-in request [:system :database :db])]
