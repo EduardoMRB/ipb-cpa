@@ -54,6 +54,7 @@
 (defn login-page []
   (layout {:body [:div.columns
                   [:div.small-6.small-centered.columns
+                  [:h4 "Primeira Igreja Presbiteriana do CPA IV"]
                    [:form
                     [:div.small-12.columns
                       [:label "Login"
