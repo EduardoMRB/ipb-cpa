@@ -30,7 +30,7 @@
                [:ul.title-area
                 [:li.name
                  [:h1
-                  [:a {:href (url-for :admin#login)} "Admin"]]]]
+                  [:a {:href (url-for :admin#dashboard)} "Admin"]]]]
                [:section.top-bar-section
                 (menu)]]
               ;; Content.
@@ -63,3 +63,7 @@
                      [:label "Senha"
                       [:input {:type "password"}]]]
                     [:button.expand.round "Entrar"]]]]}))
+
+(defn dashboard []
+  (layout {:body [:div.columns
+                  [:h1 "Bem Vindo!"]]}))

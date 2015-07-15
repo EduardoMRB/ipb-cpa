@@ -16,6 +16,9 @@
 (defn contact-page [_]
   (ring-resp/response (contact-view/contact)))
 
+(defn dashboard-page [_]
+  (ring-resp/response (admin-view/dashboard)))
+
 (defn admin-login-page [_]
   (ring-resp/response (admin-view/login-page)))
 
@@ -54,7 +57,7 @@
   [[["/" ^:interceptors [(body-params/body-params) bootstrap/html-body]
      {:get [:site#index home-page]}
      ["/contato" {:get [:site#contact contact-page]}]
-     ["/admin" {:get [:admin#login admin-login-page]}
+     ["/admin" {:get [:admin#dashboard dashboard-page]}
       ["/schedule" {:get [:admin.schedule#index admin-schedule-page]}]
       ["/video" {:get [:admin.video#index admin-video-page]}]]]
     ["/api" ^:interceptors [(body-params/body-params) bootstrap/json-body]
