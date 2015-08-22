@@ -25,6 +25,7 @@
                   :context "width=device-width, initial-scale=1"}]
           [:link {:href "css/app.css"
                   :rel "stylesheet"}]
+          [:link {:rel "shortcut icon" :href "favicon.ico"}]]
           [:body
            [:div.row
             ;; header.
@@ -46,4 +47,4 @@
            ;; JavaScript resources.
            [:script {:src "js/out/goog/base.js"}]
            [:script {:src "js/app.js"}]
-           [:script "goog.require('ipb_cpa.core');"]]]]))
+           [:script "goog.require('ipb_cpa.core');"]]]))
