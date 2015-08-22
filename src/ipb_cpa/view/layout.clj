@@ -12,7 +12,7 @@
     [:li [:a {:href "#"} "Missões"]]]])
 
 (defn header []
-  [:div.site-header
+  [:div.row.site-header
    [:a.large-2.large-offset-0.small-offset-3.small-6.columns {:href (url-for :site#index)}
     [:img {:src "images/ipb-logo-without-text.png"}]]
    (menu)])
