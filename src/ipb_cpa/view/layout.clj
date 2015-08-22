@@ -12,10 +12,11 @@
     [:li [:a {:href (url-for :site#contact)} "Fale Conosco"]]]])
 
 (defn header []
-  [:div.row.site-header
-   [:a.large-2.large-offset-0.small-offset-3.small-6.columns {:href (url-for :site#index)}
-    [:img {:src "images/ipb-logo-without-text.png"}]]
-   (menu)])
+  [:div.site-header
+   [:div.row.small-collapse.medium-uncollapse
+    [:a.large-2.large-offset-0.small-offset-3.small-6.columns {:href (url-for :site#index)}
+     [:img {:src "images/ipb-logo-without-text.png"}]]
+    (menu)]])
 
 (defn default-template [body]
   (html5 {:lang "pt-br"}
@@ -27,7 +28,7 @@
                   :rel "stylesheet"}]
           [:link {:rel "shortcut icon" :href "favicon.ico"}]]
           [:body
-           [:div.row
+           [:section {:role "main"}
             ;; header.
             (header)
             ;; Site content.
