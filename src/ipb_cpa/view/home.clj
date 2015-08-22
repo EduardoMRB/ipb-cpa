@@ -5,15 +5,17 @@
             [ipb-cpa.view.layout :as layout]))
 
 (defn random-verses []
-  [:div.small-12.large-6.small-collapse.columns
-   [:h2 "Versículo do dia"]
-   [:p (:text (get-verse))]
-   [:em (:reference (get-verse))]])
+  [:div.small-12.large-6.columns
+   [:div.panel
+    [:h2 "Versículo do dia"]
+    [:p (:text (get-verse))]
+    [:em (:reference (get-verse))]]])
 
 (defn weekly-schedule [database]
   [:div.small-12.large-6.columns
-   [:h2 "Programação Semanal"]
-   (schedule/get-schedule-view (db/get-schedules database))])
+   [:div.panel
+    [:h2 "Programação Semanal"]
+    (schedule/get-schedule-view (db/get-schedules database))]])
 
 (defn home-first-row [db]
   [:div.columns

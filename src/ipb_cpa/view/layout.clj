@@ -8,8 +8,8 @@
     [:li [:a {:href "#"} "Sobre"]]
     [:li [:a {:href "#"} "Programação"]]
     [:li [:a {:href "#"} "Mensagens e Estudos"]]
-    [:li [:a {:href (url-for :site#contact)} "Fale Conosco"]]
-    [:li [:a {:href "#"} "Missões"]]]])
+    [:li [:a {:href "#"} "Missões"]]
+    [:li [:a {:href (url-for :site#contact)} "Fale Conosco"]]]])
 
 (defn header []
   [:div.row.site-header
