@@ -58,6 +58,7 @@
      {:get [:site#index home-page]}
      ["/contato" {:get [:site#contact contact-page]}]
      ["/admin" {:get [:admin#dashboard dashboard-page]}
+      ["/login" {:get [:admin#login admin-login-page]}]
       ["/schedule" {:get [:admin.schedule#index admin-schedule-page]}]
       ["/video" {:get [:admin.video#index admin-video-page]}]]]
     ["/api" ^:interceptors [(body-params/body-params) bootstrap/json-body]

@@ -37,11 +37,18 @@
 
 (facts "admin"
   (let [resp (response-for service :get "/admin")]
-    (fact "admin login page is html"
+    (fact "dashboard page is html"
       (get-in resp
               [:headers "Content-Type"]) => "text/html;charset=UTF-8")
-    (fact "admin login page contains the word 'Login'"
-      (:body resp) => (contains "Login"))))
+    (fact "Dashboard page contains the word 'Bem Vindo!'"
+      (:body resp) => (contains "Bem Vindo!"))))
+
+(facts "admin-login"
+       (let [resp (response-for service :get "/admin/login")]
+         (fact "admin login page is html"
+               (get-in resp [:headers "Content-Type"]) => "text/html;charset=UTF-8")
+         (fact "login page contains the word Login"
+               (:body resp) => (contains "Login"))))
 
 (facts schedule-json-api
   (let [resp (response-for service :get "/api/schedule")]
