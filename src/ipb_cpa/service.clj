@@ -7,6 +7,7 @@
             [ipb-cpa.view.home :as home-view]
             [ipb-cpa.view.contact :as contact-view]
             [ipb-cpa.view.admin-view :as admin-view]
+            [ipb-cpa.view.about :as about-view]
             [ipb-cpa.db :as database]))
 
 (defn home-page [request]
@@ -15,6 +16,9 @@
 
 (defn contact-page [_]
   (ring-resp/response (contact-view/contact)))
+
+(defn about-page [_]
+  (ring-resp/response (about-view/about)))
 
 (defn dashboard-page [_]
   (ring-resp/response (admin-view/dashboard)))
@@ -56,6 +60,7 @@
 (defroutes routes
   [[["/" ^:interceptors [(body-params/body-params) bootstrap/html-body]
      {:get [:site#index home-page]}
+     ["/sobre" {:get [:site#about about-page]}]
      ["/contato" {:get [:site#contact contact-page]}]
      ["/admin" {:get [:admin#dashboard dashboard-page]}
       ["/login" {:get [:admin#login admin-login-page]}]

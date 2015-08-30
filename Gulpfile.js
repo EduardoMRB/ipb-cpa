@@ -11,7 +11,10 @@ var paths = {
 gulp.task("scss", function () {
   gulp.src(paths.scssManifesto)
     .pipe(sass({
-      includePaths: ["bower_components/foundation/scss"]
+      includePaths: [
+        "bower_components/foundation/scss",
+        "bower_components/font-awesome/scss"
+      ]
     }))
     .pipe(gulp.dest(paths.scssOut));
 });

@@ -39,9 +39,7 @@
 
                  [com.stuartsierra/component "0.2.3"]
 
-                 [hiccup "1.0.5"]
-
-                 [org.clojure/tools.nrepl "0.2.10"]]
+                 [hiccup "1.0.5"]]
   :clean-targets ^{:protect false} [:profile-path :compile-path "out" "resources/public/js/out"]
   :ragtime {:migrations ragtime.sql.files/migrations
             :database "jdbc:postgresql://localhost:5432/ipb?user=postgres&password=asdzxc"}

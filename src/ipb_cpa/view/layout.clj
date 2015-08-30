@@ -5,7 +5,7 @@
 (defn menu []
   [:nav.top-nav.large-10.small-12.columns
    [:ul.top-menu
-    [:li [:a {:href "#"} "Sobre"]]
+    [:li [:a {:href (url-for :site#about)} "Sobre"]]
     [:li [:a {:href "#"} "Programação"]]
     [:li [:a {:href "#"} "Mensagens e Estudos"]]
     [:li [:a {:href "#"} "Missões"]]
