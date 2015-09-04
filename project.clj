@@ -41,8 +41,6 @@
 
                  [hiccup "1.0.5"]]
   :clean-targets ^{:protect false} [:profile-path :compile-path "out" "resources/public/js/out"]
-  :ragtime {:migrations ragtime.sql.files/migrations
-            :database "jdbc:postgresql://localhost:5432/ipb?user=postgres&password=asdzxc"}
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]]
   :figwheel {:http-server-root "public"
