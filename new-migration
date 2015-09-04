@@ -6,7 +6,7 @@ migration_name = ARGV.first
 
 exit if migration_name.nil?
 
-MIGRATION_FOLDER = "migrations"
+MIGRATION_FOLDER = "resources/migrations"
 
 def build_migration_names(mig_name)
   time = Time.now.strftime("%Y%m%d%H%M%S")

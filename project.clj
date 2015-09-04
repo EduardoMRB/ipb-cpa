@@ -32,7 +32,7 @@
                  [instaparse "1.4.0"]
                  [yesql "0.4.0"]
                  [org.postgresql/postgresql "9.4-1201-jdbc41"]
-                 [ragtime "0.3.9"]
+                 [ragtime "0.5.1"]
                  [environ "1.0.0"]
 
                  [com.andrewmcveigh/cljs-time "0.3.7"]
@@ -44,7 +44,6 @@
   :ragtime {:migrations ragtime.sql.files/migrations
             :database "jdbc:postgresql://localhost:5432/ipb?user=postgres&password=asdzxc"}
   :plugins [[lein-cljsbuild "1.0.5"]
-            [ragtime/ragtime.lein "0.3.9"]
             [lein-figwheel "0.3.5"]]
   :figwheel {:http-server-root "public"
              :css-dirs ["resources/public/css"]
