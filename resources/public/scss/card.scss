@@ -4,6 +4,7 @@
 
   &:hover {
     box-shadow: 0 2px 2px 0 rgba(0,0,0,0.2),0 6px 10px 0 rgba(0,0,0,0.3);
+    cursor: pointer;
   }
 
   .image-wrapper {
@@ -13,7 +14,7 @@
     min-height: 250px;
 
     .image {
-      font-size: 9.5rem;
+      font-size: 9rem;
       color: #fff;
     }
   }

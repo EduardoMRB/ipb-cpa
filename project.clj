@@ -24,6 +24,7 @@
                  [cheshire "5.5.0"]
                  [cljs-ajax "0.3.13"]
                  [bouncer "0.3.3"]
+                 [domina "1.0.3"]
 
                  [com.taoensso/carmine "2.10.0"]
 
