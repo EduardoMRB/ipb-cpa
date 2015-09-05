@@ -1,26 +1,23 @@
 (ns ipb-cpa.site.about
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :as async :refer [put! >! <! chan]]
-            [domina.css :as css]
-            [domina.events :as event]))
+            [goog.dom :as dom]
+            [goog.events :as events]
+            [domina :as domina]))
 
 (enable-console-print!)
 
-(defn events [element ev]
+(defn events [el type]
   (let [out (chan)]
-    (event/listen! element ev (fn [e] (put! out e)))
+    (events/listen el type (fn [e] (put! out e)))
     out))
 
 (defn ^:export init []
-  (let [cards      (css/sel ".card")
-        _ (print cards)
-        chans      (map events cards (repeat :click))
-        event-chan (async/into (chan) chans)]
+  (let [cards      (dom/getElementsByClass "card")
+        chans      (map events cards (repeat "click"))
+        event-chan (async/merge chans)]
     (go
       (while true
         (let [e   (<! event-chan)
-              url (-> e .-target (.getAttribute "data-url"))]
-          (println e)
+              url (-> e .-currentTarget (.getAttribute "data-url"))]
           (set! (.-location js/window) url))))))
-
-(init)

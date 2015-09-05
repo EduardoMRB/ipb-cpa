@@ -15,7 +15,7 @@
   [:div.site-header
    [:div.row.small-collapse.medium-uncollapse
     [:a.large-2.large-offset-0.small-offset-3.small-6.columns {:href (url-for :site#index)}
-     [:img {:src "images/ipb-logo-without-text.png"}]]
+     [:img {:src "/images/ipb-logo-without-text.png"}]]
     (menu)]])
 
 (defn default-template [body]
@@ -24,7 +24,7 @@
           [:title "Igreja Presbiteriana do CPA IV"]
           [:meta {:name :view-port
                   :context "width=device-width, initial-scale=1"}]
-          [:link {:href "css/app.css"
+          [:link {:href "/css/app.css"
                   :rel "stylesheet"}]
           [:link {:rel "shortcut icon" :href "favicon.ico"}]]
           [:body
@@ -46,6 +46,6 @@
                         :frameborder "0"
                         :style "border:0"}]]]
            ;; JavaScript resources.
-           [:script {:src "js/out/goog/base.js"}]
-           [:script {:src "js/app.js"}]
+           [:script {:src "/js/out/goog/base.js"}]
+           [:script {:src "/js/app.js"}]
            [:script "goog.require('ipb_cpa.core');"]]]))

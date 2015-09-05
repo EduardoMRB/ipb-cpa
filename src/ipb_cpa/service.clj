@@ -60,7 +60,12 @@
 (defroutes routes
   [[["/" ^:interceptors [(body-params/body-params) bootstrap/html-body]
      {:get [:site#index home-page]}
-     ["/sobre" {:get [:site#about about-page]}]
+     ["/sobre" {:get [:site#about about-page]}
+      ["/historia" {:get [:site.about#history about-page]}]
+      ["/ministro" {:get [:site.about#ministry about-page]}]
+      ["/junta-diaconal" {:get [:site.about#deacon-board about-page]}]
+      ["/conselho" {:get [:site.about#council about-page]}]
+      ["/simbolos-de-fe" {:get [:site.about#faith-symbols about-page]}]]
      ["/contato" {:get [:site#contact contact-page]}]
      ["/admin" {:get [:admin#dashboard dashboard-page]}
       ["/login" {:get [:admin#login admin-login-page]}]
