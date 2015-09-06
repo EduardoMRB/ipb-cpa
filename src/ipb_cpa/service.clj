@@ -8,6 +8,7 @@
             [ipb-cpa.view.contact :as contact-view]
             [ipb-cpa.view.admin-view :as admin-view]
             [ipb-cpa.view.about :as about-view]
+            [ipb-cpa.view.institutional :as institutional]
             [ipb-cpa.db :as database]))
 
 (defn home-page [request]
@@ -19,6 +20,21 @@
 
 (defn about-page [_]
   (ring-resp/response (about-view/about)))
+
+(defn faith-symbols-page [_]
+  (ring-resp/response (institutional/faith-symbols-view)))
+
+(defn history-page [_]
+  (ring-resp/response (institutional/history-view)))
+
+(defn ministry-page [_]
+  (ring-resp/response (institutional/ministry-view)))
+
+(defn deacon-board-page [_]
+  (ring-resp/response (institutional/deacon-board-view)))
+
+(defn council-page [_]
+  (ring-resp/response (institutional/council-view)))
 
 (defn dashboard-page [_]
   (ring-resp/response (admin-view/dashboard)))
@@ -61,11 +77,11 @@
   [[["/" ^:interceptors [(body-params/body-params) bootstrap/html-body]
      {:get [:site#index home-page]}
      ["/sobre" {:get [:site#about about-page]}
-      ["/historia" {:get [:site.about#history about-page]}]
-      ["/ministro" {:get [:site.about#ministry about-page]}]
-      ["/junta-diaconal" {:get [:site.about#deacon-board about-page]}]
-      ["/conselho" {:get [:site.about#council about-page]}]
-      ["/simbolos-de-fe" {:get [:site.about#faith-symbols about-page]}]]
+      ["/historia" {:get [:site.about#history history-page]}]
+      ["/ministro" {:get [:site.about#ministry ministry-page]}]
+      ["/junta-diaconal" {:get [:site.about#deacon-board deacon-board-page]}]
+      ["/conselho" {:get [:site.about#council council-page]}]
+      ["/simbolos-de-fe" {:get [:site.about#faith-symbols faith-symbols-page]}]]
      ["/contato" {:get [:site#contact contact-page]}]
      ["/admin" {:get [:admin#dashboard dashboard-page]}
       ["/login" {:get [:admin#login admin-login-page]}]
