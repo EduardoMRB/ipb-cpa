@@ -15,7 +15,6 @@
   (layout/default-template
     (list
      [:div.columns
-      [:h2 "Sobre"]
       [:ul.small-block-grid-3.medium-block-grid-4.large-block-grid-5
        (card "Símbolos de fé" "glass" (url-for :site.about#faith-symbols))
        (card "História" "history" (url-for :site.about#history))
