@@ -39,6 +39,7 @@
                                 (doseq [ns-sym (modified-namespaces)]
                                   (require ns-sym :reload))
                                 @#'service/routes)
+              ::server/port 8000
               ;; all origins are allowed in dev mode
               ::server/allowed-origins {:creds true :allowed-origins (constantly true)}})
       ;; Wire up interceptor chains

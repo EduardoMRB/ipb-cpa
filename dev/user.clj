@@ -7,7 +7,8 @@
             [midje.repl :refer [autotest]]
             [ragtime.repl :as rrepl]
             [ragtime.jdbc :as jdbc]
-            [environ.core :as env :refer [env]]))
+            [environ.core :as env :refer [env]]
+            [ipb-cpa.server :as server]))
 
 (def config
   {:datastore  (jdbc/sql-database {:connection-uri (env :db-connection-uri)})
