@@ -21,4 +21,5 @@
         [:button.button "Enviar"]]]
       [:div.small-6.large-offset-3.large-4.columns
        [:h2 "Ipsum natus minus"]
-       [:p "Amet hic laborum corrupti laboriosam est quas, maxime pariatur! Illo adipisci repellat earum recusandae iste distinctio soluta sequi facilis, excepturi officia! Ad cupiditate perferendis sint dolore quisquam tempora accusantium, explicabo?"]]])))
+       [:p "Amet hic laborum corrupti laboriosam est quas, maxime pariatur! Illo adipisci repellat earum recusandae iste distinctio soluta sequi facilis, excepturi officia! Ad cupiditate perferendis sint dolore quisquam tempora accusantium, explicabo?"]]])
+    (layout/footer-map)))

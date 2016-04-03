@@ -23,4 +23,4 @@
    (random-verses)])
 
 (defn index [db]
-  (layout/default-template (home-first-row db)))
+  (layout/default-template (home-first-row db) (layout/footer-map)))
