@@ -3,8 +3,8 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "0.0-3308"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
+                 [org.clojure/clojurescript "1.8.40"]
                  [io.pedestal/pedestal.service "0.4.0"]
                  [org.omcljs/om "0.8.8"]
                  [com.cemerick/clojurescript.test "0.3.3"]
@@ -64,6 +64,7 @@
                    :dependencies [[io.pedestal/pedestal.service-tools "0.4.0"]
                                   [midje "1.7.0-beta1"]
                                   [org.clojure/tools.namespace "0.2.10"]
-                                  [org.xerial/sqlite-jdbc "3.7.2"]]
+                                  [org.xerial/sqlite-jdbc "3.7.2"]
+                                  [figwheel-sidecar "0.5.2"]]
                    :source-paths ["dev"]}
              :uberjar {:aot [ipb-cpa.server]}})
