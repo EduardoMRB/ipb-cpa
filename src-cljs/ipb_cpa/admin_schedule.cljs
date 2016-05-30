@@ -13,15 +13,16 @@
 
 (enable-console-print!)
 
-(def app-state (atom {:schedules []
-                      :days-of-the-week (array-map
-                                         :seg true
-                                         :ter false
-                                         :quar false
-                                         :quin false
-                                         :sex false
-                                         :sab false
-                                         :dom false)}))
+(defonce app-state
+  (atom {:schedules []
+         :days-of-the-week (array-map
+                            :seg true
+                            :ter false
+                            :quar false
+                            :quin false
+                            :sex false
+                            :sab false
+                            :dom false)}))
 
 ;; =============================================================================
 ;; Ajax stuff
