@@ -8,7 +8,8 @@
             [ragtime.repl :as rrepl]
             [ragtime.jdbc :as jdbc]
             [environ.core :as env :refer [env]]
-            [ipb-cpa.server :as server]))
+            [ipb-cpa.server :as server]
+            [figwheel-sidecar.repl-api :refer :all]))
 
 (def config
   {:datastore  (jdbc/sql-database {:connection-uri (env :db-connection-uri)})

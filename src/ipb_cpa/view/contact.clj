@@ -20,6 +20,7 @@
          [:textarea#email {:placeholder "Digite sua mensagem"}]]
         [:button.button "Enviar"]]]
       [:div.small-6.large-offset-3.large-4.columns
-       [:h2 "Ipsum natus minus"]
-       [:p "Amet hic laborum corrupti laboriosam est quas, maxime pariatur! Illo adipisci repellat earum recusandae iste distinctio soluta sequi facilis, excepturi officia! Ad cupiditate perferendis sint dolore quisquam tempora accusantium, explicabo?"]]])
+       [:img.th {:src "/images/pastor-manoel.jpg"}]
+       [:h4 "Rev. Manoel Seixas"]
+       [:p "Bacharel em Engenharia Elétrica pela UFMT, formado em Teologia e Bacharel em Direito pela UFMT."]]])
     (layout/footer-map)))
