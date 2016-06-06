@@ -14,12 +14,6 @@
   (->Database connection-uri))
 
 (defrecord Mailer [host port user pass]
-  component/Lifecycle
-  (start [this]
-    this)
-  (stop [this]
-    this)
-
   mail/IMailer
   (send-mail [this to from message]
     (mail/postal-send-mail this to from message)))

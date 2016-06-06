@@ -9,10 +9,6 @@
 (defonce last-message (atom nil))
 
 (defrecord TestMailer [host port user pass]
-  component/Lifecycle
-  (start [this] this)
-  (stop [this] this)
-
   mail/IMailer
   (send-mail [this to from message]
     (let [full-message (-> message
