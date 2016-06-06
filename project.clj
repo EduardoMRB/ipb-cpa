@@ -10,11 +10,7 @@
                  [com.cemerick/clojurescript.test "0.3.3"]
                  [sablono "0.3.4"]
 
-                 ;; Remove this line and uncomment one of the next lines to
-                 ;; use Immutant or Tomcat instead of Jetty:
                  [io.pedestal/pedestal.jetty "0.4.0"]
-                 ;; [io.pedestal/pedestal.immutant "0.4.0"]
-                 ;; [io.pedestal/pedestal.tomcat "0.4.0"]
 
                  [ch.qos.logback/logback-classic "1.1.2" :exclusions [org.slf4j/slf4j-api]]
                  [org.slf4j/jul-to-slf4j "1.7.7"]
@@ -40,7 +36,8 @@
 
                  [com.stuartsierra/component "0.2.3"]
 
-                 [hiccup "1.0.5"]]
+                 [hiccup "1.0.5"]
+                 [com.draines/postal "2.0.0"]]
   :clean-targets ^{:protect false} [:profile-path :compile-path "out" "resources/public/js/out"]
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]]

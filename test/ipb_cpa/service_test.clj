@@ -1,19 +1,24 @@
 (ns ipb-cpa.service-test
-  (:require [midje.sweet :refer :all]
-            [io.pedestal.test :refer :all]
-            [io.pedestal.interceptor.helpers :as interceptor]
-            [io.pedestal.http :as bootstrap]
+  (:require [cheshire.core :as json]
             [com.stuartsierra.component :as component]
             [environ.core :refer [env]]
-            [ipb-cpa.service :as service]
-            [ipb-cpa.server :as server]
-            [ipb-cpa.system :as system]))
+            [io.pedestal
+             [http :as bootstrap]
+             [test :refer :all]]
+            [io.pedestal.interceptor.helpers :as interceptor]
+            [ipb-cpa
+             [server :as server]
+             [service :as service]
+             [system :as system]]
+            [midje.sweet :refer :all]))
 
 ;; Test system.
 (def test-system-interceptor
   (interceptor/on-request
    (fn [request]
-     (let [smap (system/system (env :test-db-connection-uri))]
+     (let [mailer-params {:host (env :smtp-host) :port (env :smtp-port)
+                          :user (env :smtp-user) :pass (env :smtp-pass)}
+           smap (system/system (env :test-db-connection-uri) mailer-params)]
        (assoc request :system (component/start smap))))))
 
 (def service
@@ -33,7 +38,18 @@
     (fact "contact page returns 200 status code"
       (:status cont-resp) => 200)
     (fact "contact page content is html"
-      (get-in cont-resp [:headers "Content-Type"]) => "text/html;charset=UTF-8")))
+      (get-in cont-resp [:headers "Content-Type"]) => (contains "text/html"))))
+
+(facts "contact send message"
+  (let [body "name=Eduardo+Borges&email=eduardomrb%40gmail.com&message=Hello"
+        headers {"Content-Type" "application/x-www-form-urlencoded"}
+        send-resp (response-for service :post "/contato" :body body :headers headers)]
+
+    (fact "When email is sent, redirects to home-page"
+
+      (:status send-resp) => 302
+
+      (get-in send-resp [:headers "Location"]) => "/contato")))
 
 (facts "admin"
   (let [resp (response-for service :get "/admin")]
@@ -51,11 +67,14 @@
                (:body resp) => (contains "Login"))))
 
 (facts schedule-json-api
+
   (let [resp (response-for service :get "/api/schedule")]
     (fact "handler returns json"
       (get-in resp [:headers "Content-Type"]) => "application/json;charset=UTF-8")
     (fact "returns schedules in body"
-      (:body resp) => "[]")))
+      (:body resp) => (json/generate-string [{:id 1 :day_of_the_week "Domingo" :description "Escola biblica dominical" :time "08:30h"}
+                                             {:id 2 :day_of_the_week "Domingo" :description "Culto de adoracao" :time "19:00h"}
+                                             {:id 3 :day_of_the_week "Quinta" :description "Reuniao de oracao" :time "19:30h"}]))))
 
 (facts admin-videos-page
   (fact "content-type is html"

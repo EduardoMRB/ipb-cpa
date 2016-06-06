@@ -1,22 +1,39 @@
 (ns ipb-cpa.service
-  (:require [io.pedestal.http :as bootstrap]
-            [io.pedestal.http.route :as route]
-            [io.pedestal.http.body-params :as body-params]
+  (:require [clojure.java.io :as io]
+            [io.pedestal.http :as bootstrap]
+            [io.pedestal.http
+             [body-params :as body-params]
+             [ring-middlewares :as ring-middlewares]
+             [route :as route]]
             [io.pedestal.http.route.definition :refer [defroutes]]
-            [ring.util.response :as ring-resp]
-            [ipb-cpa.view.home :as home-view]
-            [ipb-cpa.view.contact :as contact-view]
-            [ipb-cpa.view.admin-view :as admin-view]
-            [ipb-cpa.view.about :as about-view]
-            [ipb-cpa.view.institutional :as institutional]
-            [ipb-cpa.db :as database]))
+            [io.pedestal.interceptor.helpers :as interceptor]
+            [ipb-cpa
+             [db :as database]
+             [mail :as mail]
+             [system :as system]]
+            [ipb-cpa.view
+             [about :as about-view]
+             [admin-view :as admin-view]
+             [contact :as contact-view]
+             [home :as home-view]
+             [institutional :as institutional]]
+            [ring.util.response :as ring-resp]))
 
 (defn home-page [request]
   (let [db (get-in request [:system :database :db])]
     (ring-resp/response (home-view/index db))))
 
-(defn contact-page [_]
-  (ring-resp/response (contact-view/contact)))
+(defn contact-page [request]
+  (ring-resp/response (contact-view/contact (:flash request))))
+
+(defn send-message [request]
+  (let [params       (:params request)
+        mailer       (get-in request [:system :mailer])
+        mail-message {:subject (str "Contato do site IPB CPA IV - " (params "name"))
+                      :body (params "message")}]
+    (when (mail/send-mail mailer (params "email") mail-message)
+      (-> (ring-resp/redirect "/contato")
+          (assoc :flash "Mensagem enviada com sucesso!")))))
 
 (defn about-page [_]
   (ring-resp/response (about-view/about)))
@@ -73,8 +90,14 @@
     (database/modify-schedule! db (Integer/parseInt schedule-id) schedule)
     (ring-resp/response {:ok true})))
 
+(def cors
+  (interceptor/on-response
+   (fn [response]
+     (assoc-in response [:headers "Access-Control-Allow-Origin"] "*"))))
+
 (defroutes routes
-  [[["/" ^:interceptors [(body-params/body-params) bootstrap/html-body]
+  [[["/" ^:interceptors [(body-params/body-params) bootstrap/html-body cors
+                         (ring-middlewares/session) (ring-middlewares/flash)]
      {:get [:site#index home-page]}
      ["/sobre" {:get [:site#about about-page]}
       ["/historia" {:get [:site.about#history history-page]}]
@@ -82,7 +105,9 @@
       ["/junta-diaconal" {:get [:site.about#deacon-board deacon-board-page]}]
       ["/conselho" {:get [:site.about#council council-page]}]
       ["/simbolos-de-fe" {:get [:site.about#faith-symbols faith-symbols-page]}]]
-     ["/contato" {:get [:site#contact contact-page]}]
+     ["/contato"
+      {:get [:site#contact contact-page]
+       :post [:site#send-message send-message]}]
      ["/admin" {:get [:admin#dashboard dashboard-page]}
       ["/login" {:get [:admin#login admin-login-page]}]
       ["/schedule" {:get [:admin.schedule#index admin-schedule-page]}]

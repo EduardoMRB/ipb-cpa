@@ -18,7 +18,9 @@
 (def system-interceptor
   (interceptor/on-request
    (fn [request]
-     (let [system-map (system/system (env :db-connection-uri))]
+     (let [mailer-params {:host (env :smtp-host) :port (env :smtp-port)
+                          :user (env :smtp-user) :pass (env :smtp-pass)}
+           system-map (system/system (env :db-connection-uri) mailer-params)]
        (assoc request :system (component/start system-map))))))
 
 (defn attach-interceptor [service-map interceptor]
