@@ -2,9 +2,12 @@
   (:require [postal.core :as postal]
             [clojure.core.match :refer [match]]))
 
-(defn send-mail
+(defprotocol IMailer
+  (send-mail [this to from message]))
+
+(defn postal-send-mail
   "Sends a mail message with postal"
-  [mailer from message]
+  [mailer to from message]
   (match (postal/send-message
           mailer
           (-> message

@@ -1,5 +1,6 @@
 (ns ipb-cpa.system
-  (:require [com.stuartsierra.component :as component]))
+  (:require [com.stuartsierra.component :as component]
+            [ipb-cpa.mail :as mail]))
 
 ;; Components
 (defrecord Database [connection-uri]
@@ -17,11 +18,14 @@
   (start [this]
     this)
   (stop [this]
-    this))
+    this)
+
+  mail/IMailer
+  (send-mail [this to from message]
+    (mail/postal-send-mail this to from message)))
 
 (defn make-mailer [{:keys [host port user pass]}]
   (->Mailer host port user pass))
-(make-mailer {:host "localhost" :port 1025 :user "" :pass ""})
 
 ;; System
 (defn system [connection-uri mailer-params]

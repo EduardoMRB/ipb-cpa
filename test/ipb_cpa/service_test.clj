@@ -1,7 +1,6 @@
 (ns ipb-cpa.service-test
   (:require [cheshire.core :as json]
             [com.stuartsierra.component :as component]
-            [environ.core :refer [env]]
             [io.pedestal
              [http :as bootstrap]
              [test :refer :all]]
@@ -9,17 +8,14 @@
             [ipb-cpa
              [server :as server]
              [service :as service]
-             [system :as system]]
+             [test-system :as test-system]]
             [midje.sweet :refer :all]))
 
 ;; Test system.
 (def test-system-interceptor
   (interceptor/on-request
    (fn [request]
-     (let [mailer-params {:host (env :smtp-host) :port (env :smtp-port)
-                          :user (env :smtp-user) :pass (env :smtp-pass)}
-           smap (system/system (env :test-db-connection-uri) mailer-params)]
-       (assoc request :system (component/start smap))))))
+     (assoc request :system (component/start (test-system/test-system))))))
 
 (def service
   (-> service/service
@@ -48,6 +44,11 @@
     (fact "When email is sent, redirects to home-page"
 
       (:status send-resp) => 302
+
+      @test-system/last-message => {:to "pastor@gmail.com"
+                                    :from "eduardomrb@gmail.com"
+                                    :subject "Contato do site IPB CPA IV - Eduardo Borges"
+                                    :body "Hello"}
 
       (get-in send-resp [:headers "Location"]) => "/contato")))
 

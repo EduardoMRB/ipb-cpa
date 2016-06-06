@@ -31,7 +31,7 @@
         mailer       (get-in request [:system :mailer])
         mail-message {:subject (str "Contato do site IPB CPA IV - " (params "name"))
                       :body (params "message")}]
-    (when (mail/send-mail mailer (params "email") mail-message)
+    (when (mail/send-mail mailer "pastor@gmail.com" (params "email") mail-message)
       (-> (ring-resp/redirect "/contato")
           (assoc :flash "Mensagem enviada com sucesso!")))))
 
