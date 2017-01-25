@@ -22,5 +22,5 @@
    (weekly-schedule db)
    (random-verses)])
 
-(defn index [db]
-  (layout/default-template (home-first-row db) (layout/footer-map)))
+(defn index [url-for db]
+  (layout/default-template url-for (home-first-row db) (layout/footer-map)))

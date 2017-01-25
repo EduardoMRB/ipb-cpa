@@ -20,7 +20,6 @@
 (def service
   (-> service/service
       bootstrap/default-interceptors
-      (server/attach-interceptor test-system-interceptor)
       bootstrap/service-fn
       ::bootstrap/service-fn))
 

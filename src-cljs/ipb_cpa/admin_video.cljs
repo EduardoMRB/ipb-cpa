@@ -1,8 +1,6 @@
 (ns ipb-cpa.admin-video
   (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [om.core :as om]
-            [sablono.core :as html :refer-macros [html]]
-            [ajax.core :refer [GET POST PUT DELETE]]
+  (:require [ajax.core :refer [GET POST PUT DELETE]]
             [cljs.core.async :as async :refer [chan put! <! >! alts!]]
             [ipb-cpa.helper :as helper]
             [bouncer.core :as b]
@@ -61,7 +59,7 @@
 ;; Component functions
 ;; =============================================================================
 
-(defn set-embedded-iframe [owner e]
+#_(defn set-embedded-iframe [owner e]
   (let [embedded (-> e .-target .-value)
         error    (if (embedded-valid? embedded)
                    ""
@@ -69,7 +67,7 @@
     (om/set-state! owner :embedded-iframe embedded)
     (om/set-state! owner :embedded-error error)))
 
-(defn reset-video-state! [owner]
+#_(defn reset-video-state! [owner]
   (om/set-state! owner :embedded-iframe "")
   (om/set-state! owner :embedded-error "")
   (om/set-state! owner :title "")
@@ -91,7 +89,7 @@
 ;; Components
 ;; =============================================================================
 
-(defn new-video [data owner]
+#_(defn new-video [data owner]
   (reify
    om/IInitState
    (init-state [_]
@@ -169,7 +167,7 @@
                                     (reset-video-state! owner))))}
            "Criar"]]]]))))
 
-(defn expanded-row [video owner]
+#_(defn expanded-row [video owner]
   (reify
    om/IInitState
    (init-state [_]
@@ -248,7 +246,7 @@
             "Salvar"]]
           ]]]))))
 
-(defn collapsed-row [video owner]
+#_(defn collapsed-row [video owner]
   (reify
    om/IRender
    (render [_]
@@ -262,7 +260,7 @@
         [:div.small-2.columns.content-holder
          [:span.bottom-text.light (br-date (:date video))]]]))))
 
-(defn video-row [video owner]
+#_(defn video-row [video owner]
   (reify
    om/IInitState
    (init-state [_]
@@ -283,7 +281,7 @@
           (om/build expanded-row video {:init-state {:editing editing}})
           (om/build collapsed-row video))]))))
 
-(defn video-list [videos owner]
+#_(defn video-list [videos owner]
   (reify
    om/IRender
    (render [_]
@@ -291,7 +289,7 @@
        [:div.video-list.columns
         (om/build-all video-row videos)]))))
 
-(defn video [data owner]
+#_(defn video [data owner]
   (reify
    om/IRender
    (render [_]
@@ -308,6 +306,6 @@
 ;; Om root
 ;; =============================================================================
 
-(om/root video
+#_(om/root video
          app-state
          {:target (.getElementById js/document "video-component")})

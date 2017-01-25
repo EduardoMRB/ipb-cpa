@@ -6,6 +6,8 @@ logs/
 /.lein-failures
 resources/public/js/out/
 resources/public/js/app.js
+resources/public/js/compiled/out/
+resources/public/js/compiled/app.js
 resources/public/css/app.css
 /bower_components
 /node_modules

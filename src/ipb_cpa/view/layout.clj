@@ -1,8 +1,7 @@
 (ns ipb-cpa.view.layout
-  (:require [hiccup.page :refer [html5]]
-            [io.pedestal.http.route :refer [url-for]]))
+  (:require [hiccup.page :refer [html5]]))
 
-(defn menu []
+(defn menu [url-for]
   [:nav.top-nav.large-10.small-12.columns
    [:ul.top-menu
     [:li [:a {:href (url-for :site#about)} "Sobre"]]
@@ -11,17 +10,17 @@
     [:li [:a {:href "#"} "Missões"]]
     [:li [:a {:href (url-for :site#contact)} "Fale Conosco"]]]])
 
-(defn header []
+(defn header [url-for]
   [:div.site-header
    [:div.row.small-collapse.medium-uncollapse
     [:a.large-2.large-offset-0.small-offset-3.small-6.columns {:href (url-for :site#index)}
      [:img {:src "/images/ipb-logo-without-text.png"}]]
-    (menu)]])
+    (menu url-for)]])
 
 (defn default-template
-  ([body]
-   (default-template body [:div]))
-  ([body footer]
+  ([url-for body]
+   (default-template url-for body [:div]))
+  ([url-for body footer]
    (html5 {:lang "pt-br"}
           [:head
            [:title "Igreja Presbiteriana do CPA IV"]
@@ -33,7 +32,7 @@
           [:body
            [:section {:role "main"}
             ;; header.
-            (header)
+            (header url-for)
             ;; Site content.
             [:main.site-content
              body]

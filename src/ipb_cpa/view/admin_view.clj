@@ -25,22 +25,13 @@
                     :rel "stylesheet"}]
             [:body
              [:div
-              ;; Menu
-              [:nav.top-bar
-               [:ul.title-area
-                [:li.name
-                 [:h1
-                  [:a {:href (url-for :admin#dashboard)} "Admin"]]]]
-               [:section.top-bar-section
-                (menu)]]
-              ;; Content.
-              [:main.admin-content
-               body]
-              ;; Footer.
-              [:footer.admin-footer]
+              ;; Here the app will be mounted.
+              body
+
               ;; JavaScript resources.
-              [:script {:src "/js/out/goog/base.js"}]
-              [:script {:src "/js/app.js"}]
+              [:script {:src "/js/compiled/app.js"}]
+              [:script
+               "ipb_cpa.core.init()"]
               scripts]]])))
 
 (defn schedule-index [db]
@@ -65,5 +56,4 @@
                     [:button.expand.round "Entrar"]]]]}))
 
 (defn dashboard []
-  (layout {:body [:div.columns
-                  [:h1 "Bem Vindo!"]]}))
+  (layout {:body [:div#app]}))

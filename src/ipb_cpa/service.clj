@@ -9,22 +9,25 @@
             [io.pedestal.interceptor.helpers :as interceptor]
             [ipb-cpa
              [db :as database]
-             [mail :as mail]
-             [system :as system]]
+             [mail :as mail]]
             [ipb-cpa.view
              [about :as about-view]
              [admin-view :as admin-view]
              [contact :as contact-view]
              [home :as home-view]
              [institutional :as institutional]]
-            [ring.util.response :as ring-resp]))
+            [ring.util.response :as ring-resp]
+            [io.pedestal.log :as log]))
+
+(declare url-for)
 
 (defn home-page [request]
+  (log/info :request request :message "Request is getting here")
   (let [db (get-in request [:system :database :db])]
-    (ring-resp/response (home-view/index db))))
+    (ring-resp/response (home-view/index url-for db))))
 
 (defn contact-page [request]
-  (ring-resp/response (contact-view/contact (:flash request))))
+  (ring-resp/response (contact-view/contact url-for (:flash request))))
 
 (defn send-message [request]
   (let [params       (:params request)
@@ -36,7 +39,7 @@
           (assoc :flash "Mensagem enviada com sucesso!")))))
 
 (defn about-page [_]
-  (ring-resp/response (about-view/about)))
+  (ring-resp/response (about-view/about url-for)))
 
 (defn faith-symbols-page [_]
   (ring-resp/response (institutional/faith-symbols-view)))
@@ -95,52 +98,38 @@
    (fn [response]
      (assoc-in response [:headers "Access-Control-Allow-Origin"] "*"))))
 
-(defroutes routes
-  [[["/" ^:interceptors [(body-params/body-params) bootstrap/html-body cors
-                         (ring-middlewares/session) (ring-middlewares/flash)]
-     {:get [:site#index home-page]}
-     ["/sobre" {:get [:site#about about-page]}
-      ["/historia" {:get [:site.about#history history-page]}]
-      ["/ministro" {:get [:site.about#ministry ministry-page]}]
-      ["/junta-diaconal" {:get [:site.about#deacon-board deacon-board-page]}]
-      ["/conselho" {:get [:site.about#council council-page]}]
-      ["/simbolos-de-fe" {:get [:site.about#faith-symbols faith-symbols-page]}]]
-     ["/contato"
-      {:get [:site#contact contact-page]
-       :post [:site#send-message send-message]}]
-     ["/admin" {:get [:admin#dashboard dashboard-page]}
-      ["/login" {:get [:admin#login admin-login-page]}]
-      ["/schedule" {:get [:admin.schedule#index admin-schedule-page]}]
-      ["/video" {:get [:admin.video#index admin-video-page]}]]]
-    ["/api" ^:interceptors [(body-params/body-params) bootstrap/json-body]
-     ["/schedule" {:get [:api.schedule#index get-json-schedules]
-                   :post [:api.schedule#create add-schedule]}
-      ["/:id" {:delete [:api.schedule#delete delete-schedule]
-               :put [:api.schedule#update update-schedule]}]]]]])
+(def routes
+  `{"/" {:interceptors [(body-params/body-params) bootstrap/html-body cors
+                        (ring-middlewares/session) (ring-middlewares/flash)]
+         :route-name   :site#index
+         :get          [:site#index home-page]
+         "/sobre"      {:get              [:site#about about-page]
+                        "/historia"       {:get [:site.about#history history-page]}
+                        "/ministro"       {:get [:site.about#ministry ministry-page]}
+                        "/junta-diaconal" {:get [:site.about#deacon-board deacon-board-page]}
+                        "/conselho"       {:get [:site.about#council council-page]}
+                        "/simbolos-de-fe" {:get [:site.about#faith-symbols faith-symbols-page]}}
+         "/contato"    {:get  [:site#contact contact-page]
+                        :post [:site#send-message send-message]}
+         "/admin"      {:get        [:admin#dashboard dashboard-page]
+                        "/login"    {:get [:admin#login admin-login-page]}
+                        "/schedule" {:get [:admin.schedule#index admin-schedule-page]}
+                        "/video"    {:get [:admin.video#index admin-video-page]}}
+         "/api"        {:interceptors [(body-params/body-params) bootstrap/json-body]
+                        "/schedule"   {:get   [:api.schedule#index get-json-schedules]
+                                       :post  [:api.schedule#create add-schedule]
+                                       "/:id" {:delete [:api.schedule#delete delete-schedule]
+                                               :put    [:api.schedule#update update-schedule]}}}}})
 
-;; Consumed by ipb-cpa.server/create-server
-;; See bootstrap/default-interceptors for additional options you can configure
+(def url-for (route/url-for-routes (route/expand-routes routes)))
+
 (def service {:env :prod
-              ;; You can bring your own non-default interceptors. Make
-              ;; sure you include routing and set it up right for
-              ;; dev-mode. If you do, many other keys for configuring
-              ;; default interceptors will be ignored.
-              ;; ::bootstrap/interceptors []
               ::bootstrap/routes routes
-
-              ;; Uncomment next line to enable CORS support, add
-              ;; string(s) specifying scheme, host and port for
-              ;; allowed source(s):
-              ;;
-              ;; "http://localhost:8080"
-              ;;
-              ;;::bootstrap/allowed-origins ["scheme://host:port"]
-
-              ;; Root for resource interceptor that is available by default.
               ::bootstrap/resource-path "/public"
-
-              ;; Either :jetty, :immutant or :tomcat (see comments in project.clj)
               ::bootstrap/type :jetty
-              ;;::bootstrap/host "localhost"
-              ::bootstrap/port 8080})
+              ::bootstrap/join? false
+              ::bootstrap/port 8080
+              ::bootstrap/container-options {:h2c? true
+                                             :h2? false
+                                             :ssl? false}})
 

@@ -1,16 +1,13 @@
 (defproject ipb-cpa "0.0.1-SNAPSHOT"
-  :description "FIXME: write description"
+  :description "First presbyterian church of CPA IV's website."
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.8.40"]
-                 [io.pedestal/pedestal.service "0.4.0"]
-                 [org.omcljs/om "0.8.8"]
-                 [com.cemerick/clojurescript.test "0.3.3"]
-                 [sablono "0.3.4"]
+                 [org.clojure/clojurescript "1.9.293"]
 
-                 [io.pedestal/pedestal.jetty "0.4.0"]
+                 [io.pedestal/pedestal.service "0.5.2"]
+                 [io.pedestal/pedestal.jetty "0.5.2"]
 
                  [ch.qos.logback/logback-classic "1.1.2" :exclusions [org.slf4j/slf4j-api]]
                  [org.slf4j/jul-to-slf4j "1.7.7"]
@@ -24,8 +21,6 @@
 
                  [com.taoensso/carmine "2.10.0"]
 
-                 [ns-tracker "0.3.0"]
-
                  [instaparse "1.4.0"]
                  [yesql "0.4.0"]
                  [org.postgresql/postgresql "9.4-1201-jdbc41"]
@@ -34,34 +29,36 @@
 
                  [com.andrewmcveigh/cljs-time "0.3.7"]
 
-                 [com.stuartsierra/component "0.2.3"]
+                 [com.stuartsierra/component "0.3.1"]
 
                  [hiccup "1.0.5"]
-                 [com.draines/postal "2.0.0"]]
-  :clean-targets ^{:protect false} [:profile-path :compile-path "out" "resources/public/js/out"]
-  :plugins [[lein-cljsbuild "1.0.5"]
-            [lein-figwheel "0.3.5"]]
-  :figwheel {:http-server-root "public"
-             :css-dirs ["resources/public/css"]
-             :nrepl-port 7888}
+                 [com.draines/postal "2.0.0"]
+                 [reagent "0.6.0"]
+                 [re-frame "0.9.1"]
+                 [binaryage/devtools "0.9.0"]
+                 [secretary "1.2.3"]]
+  :clean-targets ^{:protect false} [:profile-path :compile-path "out" "resources/public/js/compiled/out"]
+  :figwheel {:css-dirs ["resources/public/css"]}
+  :plugins [[lein-cljsbuild "1.1.5"]]
   :cljsbuild {:builds [{:id "dev"
-                        :source-paths ["src-cljs" "test-cljs"]
+                        :source-paths ["src-cljs"]
                         :figwheel true
-                        :compiler {:output-to "resources/public/js/app.js"
-                                   :output-dir "resources/public/js/out"
-                                   :asset-path "js/out"
-                                   :optimizations :none
-                                   :pretty-print true}}]
-              :test-commands {"phantom" ["phantomjs"
-                                         "resources/public/js/out/goog/base.js"
-                                         "resources/public/js/app.js"]}}
+                        :compiler {:main ipb-cpa.core
+                                   :output-to "resources/public/js/compiled/app.js"
+                                   :output-dir "resources/public/js/compiled/out"
+                                   :asset-path "js/compiled/out"
+                                   :source-map-timestamp true}}]}
   :min-lein-version "2.0.0"
   :resource-paths ["config", "resources"]
-  :profiles {:dev {:aliases {"run-dev" ["trampoline" "run" "-m" "ipb-cpa.server/run-dev"]}
-                   :dependencies [[io.pedestal/pedestal.service-tools "0.4.0"]
-                                  [midje "1.7.0-beta1"]
+  :profiles {:dev {:plugins [[lein-figwheel "0.5.8"]]
+                   :dependencies [[io.pedestal/pedestal.service-tools "0.5.2"]
+                                  [midje "1.8.3"]
                                   [org.clojure/tools.namespace "0.2.10"]
                                   [org.xerial/sqlite-jdbc "3.7.2"]
-                                  [figwheel-sidecar "0.5.2"]]
+                                  [figwheel-sidecar "0.5.8"]
+                                  [com.cemerick/piggieback "0.2.1"]]
                    :source-paths ["dev"]}
-             :uberjar {:aot [ipb-cpa.server]}})
+             :uberjar {:aot [ipb-cpa.server]}
+             :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
+                            :init-ns user}}
+  :main ipb-cpa.server)
