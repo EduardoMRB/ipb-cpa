@@ -56,7 +56,7 @@
                             http/default-interceptors
                             (attach-component-interceptor (system-interceptor :database database))
                             (attach-component-interceptor (system-interceptor :mailer mailer)))]
-        (log/info :message (str "Starting WebServer on port: " port))
+        (log/info :message (str "Starting WebServer on port: " port) :env env)
         (if (= env :dev)
           (assoc this :runnable-service (-> service-map
                                             (merge {:env :dev

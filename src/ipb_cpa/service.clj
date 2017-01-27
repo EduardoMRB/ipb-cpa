@@ -1,6 +1,5 @@
 (ns ipb-cpa.service
-  (:require [clojure.java.io :as io]
-            [io.pedestal.http :as bootstrap]
+  (:require [io.pedestal.http :as bootstrap]
             [io.pedestal.http
              [body-params :as body-params]
              [ring-middlewares :as ring-middlewares]
@@ -76,7 +75,7 @@
 
 (defn add-schedule [request]
   (let [db (get-in request [:system :database :db])
-        schedule (get-in request [:transit-params :schedule])
+        schedule (:json-params request)
         schedule-id (database/add-schedule<! db schedule)]
     (ring-resp/response {:schedule-id schedule-id})))
 
@@ -89,7 +88,7 @@
 (defn update-schedule [request]
   (let [db (get-in request [:system :database :db])
         schedule-id (get-in request [:path-params :id])
-        schedule (get-in request [:transit-params :schedule])]
+        schedule (:json-params request)]
     (database/modify-schedule! db (Integer/parseInt schedule-id) schedule)
     (ring-resp/response {:ok true})))
 
@@ -115,7 +114,7 @@
                         "/login"    {:get [:admin#login admin-login-page]}
                         "/schedule" {:get [:admin.schedule#index admin-schedule-page]}
                         "/video"    {:get [:admin.video#index admin-video-page]}}
-         "/api"        {:interceptors [(body-params/body-params) bootstrap/json-body]
+         "/api"        {:interceptors [bootstrap/json-body ring-middlewares/keyword-params]
                         "/schedule"   {:get   [:api.schedule#index get-json-schedules]
                                        :post  [:api.schedule#create add-schedule]
                                        "/:id" {:delete [:api.schedule#delete delete-schedule]

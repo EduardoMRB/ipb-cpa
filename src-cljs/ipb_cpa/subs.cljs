@@ -29,3 +29,8 @@
    (if-let [deleting? (get-in db [:deleting-schedules (:id schedule)])]
      deleting?
      false)))
+
+(reg-sub
+ :schedule/new-schedule
+ (fn [db _]
+   (:new-schedule db)))

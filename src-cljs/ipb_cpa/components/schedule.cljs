@@ -69,99 +69,9 @@
               :description [[v/required :message "A programação precisa ter um nome"]]
               :time [[v/matches #"\d{2}:\d{2}h" :message "O horário precisa ter o formato: 13:30h"]]))
 
-;; ;; =============================================================================
-;; ;; Components
-;; ;; =============================================================================
-;; (defn delete-schedule
-;;   "Deletes passed shedules from the app-state"
-;;   [data schedule]
-;;   (let [success-c (chan)
-;;         failure-c (chan)
-;;         _ (destroy-schedule (:id schedule) success-c failure-c)]
-;;     (go
-;;      (while true
-;;        (let [[v c] (alts! [success-c failure-c])]
-;;          (condp = c
-;;            success-c
-;;            (om/transact! data
-;;                          :schedules
-;;                          (fn [schedules]
-;;                            (vec (remove (partial = schedule) schedules))))
-;;            failure-c
-;;            (.log js/console "Something bad happened" v)))))))
-
-;; (defn reset-schedule-list-state! [owner]
-;;   (om/set-state! owner :description "")
-;;   (om/set-state! owner :time "")
-;;   (om/set-state! owner :errors {}))
-
-;; (defn add-schedule
-;;   "Adds a new schedule to the database, in case of errors, nothing is done,
-;;   otherwise, the id returned by the server is assoced into the new schedule and
-;;   it's added to the app-state"
-;;   [data args]
-;;   (let [owner (:owner args)
-;;         schedule (dissoc args :owner)
-;;         [errors schedule] (validate-schedule schedule)]
-;;     (cond
-;;       (seq errors) ;; Validation errors occurs.
-;;       (om/set-state! owner :errors errors)
-
-;;       :else ;; Schedule is valid, proceed.
-;;       (let [success-c (chan)
-;;             failure-c (chan)
-;;             _ (persist-schedule schedule success-c failure-c)]
-;;         (go
-;;          (while true
-;;            (let [[v c] (alts! [success-c failure-c])]
-;;              (condp = c
-;;                success-c
-;;                (let [new-schedule (assoc schedule :id (:schedule-id v))]
-;;                  ;; Add the database generated id into the schedule map and put
-;;                  ;; it into the app-state
-;;                  (om/transact! data :schedules #(vec (sort-schedules
-;;                                                       (conj % new-schedule))))
-;;                  (reset-schedule-list-state! owner))
-;;                failure-c
-;;                (.log js/console "something went wrong" v)))))))))
-
-;; (defn handle-change [e key owner]
-;;   (om/set-state! owner key (get-input-value (.-target e))))
-
-;; (defn update-schedule
-;;   "Updates a schedule with new description and time attributes mantaining the id
-;;   and day_of_the_week fields as it is"
-;;   [data args]
-;;   (let [schedule   (-> args
-;;                        (dissoc :owner)
-;;                        (dissoc :edit))
-;;         edit       (:edit args)
-;;         owner      (:owner args)
-;;         [errors _] (validate-schedule schedule)]
-;;     (cond
-;;       (seq errors)
-;;       (om/set-state! owner :errors errors)
-
-;;       :else
-;;       (let [success-c  (chan)
-;;             failure-c  (chan)
-;;             _          (put-schedule schedule success-c failure-c)]
-;;         (go
-;;          (while true
-;;            (let [[v c] (alts! [success-c failure-c])]
-;;              (condp = c
-;;                success-c
-;;                (do
-;;                  (om/transact! data
-;;                                :schedules
-;;                                (fn [schedules]
-;;                                  (let [scds (->> schedules
-;;                                                  (remove #(= (:id %) (:id schedule))))]
-;;                                    (vec (sort-schedules (conj scds schedule))))))
-;;                  (put! edit false))
-
-;;                failure-c
-;;                (.log js/console "Something went wrong" v)))))))))
+;; =============================================================================
+;; Components
+;; =============================================================================
 
 (defn tab [day active?]
   [:li.tab-title {:class-name (if active? "active")}
@@ -231,9 +141,8 @@
          [:button.tiny.alert {:on-click #(dispatch [:schedule/set-deleting (:id schedule) true])}
           "Remover"]]))))
 
-(defn schedule-list []
-  (let [schedules        (subscribe [:schedules])
-        days-of-the-week (subscribe [:days-of-the-week])]
+(defn schedule-list [schedules days-of-the-week]
+  (let [new-schedule (subscribe [:schedule/new-schedule])]
     (fn []
       (let [active-day     (active-tab @days-of-the-week)
             schedule-items (->> @schedules
@@ -242,7 +151,7 @@
         [:div.row
          [:ul.no-bullet
           (for [schedule-item schedule-items]
-            ^{:key (:time schedule-item)}
+            ^{:key (:id schedule-item)}
             [schedule-line schedule-item])]
 
          [:form
@@ -254,27 +163,29 @@
               [:div.small-3.columns
                [:span.prefix "Nome"]]
               [:div.small-9.columns
-               [:input {:type :text
-                        :on-change #(.log js/console "Changing text here")}]]]]
+               [:input {:type      :text
+                        :value     (:description @new-schedule)
+                        :on-change #(dispatch [:schedule/set-new :description (helpers/get-target-value %)])}]]]]
 
             [:div.large-6.columns
              [:div.row.collapse.prefix-radius
               [:div.small-9.columns
-               [:input {:type :text
-                        :on-change #(.log js/console "Changing text here")}]]
+               [:input {:type      :text
+                        :value     (:time @new-schedule)
+                        :on-change #(dispatch [:schedule/set-new :time (helpers/get-target-value %)])}]]
               [:div.small-3.columns
                [:span.postfix "Horário"]]]]]
 
            [:div.large-2.large-offset-10.columns
-            [:button.small {:type :button
-                            :on-click #(.log js/console "Clicking desperately on this button")}
+            [:button.small {:type     :button
+                            :on-click #(dispatch [:schedule/create active-tab])}
              "Criar"]]]]]))))
 
 (defn schedule-panel []
-  (let [schedules (subscribe [:schedules])
+  (let [schedules        (subscribe [:schedules])
         days-of-the-week (subscribe [:days-of-the-week])]
     (fn []
       [:div.large-8.columns
        [:h1 "Programação"]
        [tabs @days-of-the-week]
-       [schedule-list @schedules @days-of-the-week]])))
+       [schedule-list schedules days-of-the-week]])))
