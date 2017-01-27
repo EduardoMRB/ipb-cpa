@@ -14,8 +14,8 @@
                  [org.slf4j/jcl-over-slf4j "1.7.7"]
                  [org.slf4j/log4j-over-slf4j "1.7.7"]
 
-                 [cheshire "5.5.0"]
-                 [cljs-ajax "0.3.13"]
+                 [cheshire "5.7.0"]
+                 [cljs-ajax "0.5.8"]
                  [bouncer "0.3.3"]
                  [domina "1.0.3"]
 
@@ -27,22 +27,25 @@
                  [ragtime "0.5.1"]
                  [environ "1.0.0"]
 
-                 [com.andrewmcveigh/cljs-time "0.3.7"]
+                 [com.andrewmcveigh/cljs-time "0.4.0"]
 
                  [com.stuartsierra/component "0.3.1"]
 
                  [hiccup "1.0.5"]
                  [com.draines/postal "2.0.0"]
+
                  [reagent "0.6.0"]
                  [re-frame "0.9.1"]
-                 [binaryage/devtools "0.9.0"]
-                 [secretary "1.2.3"]]
+                 [secretary "1.2.3"]
+                 [day8.re-frame/http-fx "0.1.3"]
+
+                 [com.rpl/specter "0.13.2"]]
   :clean-targets ^{:protect false} [:profile-path :compile-path "out" "resources/public/js/compiled/out"]
   :figwheel {:css-dirs ["resources/public/css"]}
   :plugins [[lein-cljsbuild "1.1.5"]]
   :cljsbuild {:builds [{:id "dev"
                         :source-paths ["src-cljs"]
-                        :figwheel true
+                        :figwheel {:on-jsload "ipb-cpa.core/mount-root"}
                         :compiler {:main ipb-cpa.core
                                    :output-to "resources/public/js/compiled/app.js"
                                    :output-dir "resources/public/js/compiled/out"
@@ -56,7 +59,8 @@
                                   [org.clojure/tools.namespace "0.2.10"]
                                   [org.xerial/sqlite-jdbc "3.7.2"]
                                   [figwheel-sidecar "0.5.8"]
-                                  [com.cemerick/piggieback "0.2.1"]]
+                                  [com.cemerick/piggieback "0.2.1"]
+                                  [binaryage/devtools "0.9.0"]]
                    :source-paths ["dev"]}
              :uberjar {:aot [ipb-cpa.server]}
              :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]

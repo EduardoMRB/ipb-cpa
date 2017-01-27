@@ -1,5 +1,6 @@
 (ns ipb-cpa.views
-  (:require [re-frame.core :as rf :refer [subscribe]]))
+  (:require [ipb-cpa.components.schedule :as schedule]
+            [re-frame.core :as rf :refer [subscribe]]))
 
 (def sections
   [{:url "#/schedule" :name "Programação"}
@@ -15,10 +16,6 @@
 (defn dashboard []
   [:div.columns
    [:h1 "Here is the dashboard"]])
-
-(defn schedule []
-  [:div.columns
-   [:h1 "Here is the schedule"]])
 
 (defn videos []
   [:div.columns
@@ -39,7 +36,7 @@
        [:main.admin-content
         (case @active-panel
           :home-panel [dashboard]
-          :schedule-panel [schedule]
+          :schedule-panel [schedule/schedule-panel]
           :videos-panel [videos]
           [:h1 "whoops"])]
 
