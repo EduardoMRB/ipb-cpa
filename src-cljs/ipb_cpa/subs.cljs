@@ -1,5 +1,6 @@
 (ns ipb-cpa.subs
-  (:require [re-frame.core :as rf :refer [reg-sub]]))
+  (:require [re-frame.core :as rf :refer [reg-sub]]
+            [ipb-cpa.helper :as helpers]))
 
 (reg-sub
  :active-panel
@@ -36,6 +37,13 @@
    (:new-schedule db)))
 
 (reg-sub
- :db
+ :schedule/active-day
  (fn [db _]
-   db))
+   (helpers/active-tab (:days-of-the-week db))))
+
+(reg-sub
+ :schedule/events-of-day
+ (fn [db [_ day]]
+   (filter (fn [{:keys [day_of_the_week]}]
+             (= day day_of_the_week))
+           (:schedules db))))

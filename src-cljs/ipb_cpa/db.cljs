@@ -7,7 +7,7 @@
    :deleting-schedules {}
    :new-schedule       {:description ""
                         :time        ""
-                        :day_of_the_week ""}
+                        :day_of_the_week "Segunda"}
    :days-of-the-week   (array-map
                         :seg true
                         :ter false
