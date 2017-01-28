@@ -78,8 +78,10 @@
 (reg-event-fx
  :schedule/deleted
  (fn [{:keys [db]} [_ schedule _]]
-   {:db (update db :schedules (fn [schedules]
-                                (remove #(= (:id %) (:id schedule)) schedule)))
+   {:db (update db
+                :schedules
+                (fn [schedules]
+                  (remove #(= (:id %) (:id schedule)) schedules)))
     :dispatch [:schedule/set-deleting (:id schedule) false]}))
 
 (reg-event-db

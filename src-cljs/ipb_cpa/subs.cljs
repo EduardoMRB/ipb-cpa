@@ -34,3 +34,8 @@
  :schedule/new-schedule
  (fn [db _]
    (:new-schedule db)))
+
+(reg-sub
+ :db
+ (fn [db _]
+   db))

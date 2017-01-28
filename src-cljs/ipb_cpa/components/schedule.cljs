@@ -8,49 +8,54 @@
             [reagent.core :as r]
             [ipb-cpa.helper :as helpers]))
 
-;; =============================================================================
-;; Ajax stuff
-;; =============================================================================
+;; ------------------------
+;; Styles
+;; ------------------------
 
-(declare sort-schedules)
+(def styles
+  {:tab {:border-color "#ccc"
+         :width "14.27%"}
 
-(defn resource-call [f url success-c failure-c & params]
-  (let [default-map {:handler #(put! success-c %)
-                     :error-handler #(put! failure-c %)
-                     :response-format :json
-                     :keywords? true}
-        params (if (seq params) (first params))
-        options (if params (assoc default-map :params params) default-map)]
-    (f url options)))
+   :tab-inactive {:border-width 1
+                  :border-style :solid
+                  :border-color "#ccc"
+                  :border-bottom-color "#ccc"}
 
-(defn persist-schedule [schedule success-c failure-c]
-  (resource-call POST "/api/schedule" success-c failure-c {:schedule schedule}))
+   :tab-active {:border-width "1px 1px 4px 1px"
+                :border-style :solid
+                :border-bottom-color "#00a4df"}
 
-(defn destroy-schedule [schedule-id success-c failure-c]
-  (resource-call DELETE (str "/api/schedule/" schedule-id) success-c failure-c))
+   :tab-name {:color "#96a9b9"
+              :text-transform :uppercase
+              :text-align :center
+              :font-size 12
+              :align-self :center}
 
-(defn put-schedule [schedule success-c failure-c]
-  (resource-call PUT
-                 (str "/api/schedule/" (:id schedule))
-                 success-c
-                 failure-c
-                 {:schedule schedule}))
+   :badge {:border-radius "10%"
+           :background-color "#767676"
+           :color "#fefefe"
+           :padding 5
+           :font-align :center
+           :font-size 12
+           }})
 
 ;; =============================================================================
 ;; Util functions
 ;; =============================================================================
 
+(def day-kw->day
+  {:seg "Segunda" :ter "Terça" :quar "Quarta" :quin "Quinta"
+   :sex "Sexta" :sab "Sábado" :dom "Domingo"})
+
 (defn tab-name [tab-keyword]
-  (s/capitalize (s/replace (str tab-keyword) ":" "")))
+  (day-kw->day tab-keyword))
 
 (defn active-tab [days-of-week]
-  (let [mappings {:seg "Segunda" :ter "Terça" :quar "Quarta" :quin "Quinta"
-                  :sex "Sexta" :sab "Sábado" :dom "Domingo"}]
-    (->> days-of-week
-         (filter (fn [[_ active?]]
-                   active?))
-         (ffirst)
-         (mappings))))
+  (->> days-of-week
+       (filter (fn [[_ active?]]
+                 active?))
+       (ffirst)
+       day-kw->day))
 
 ;; =============================================================================
 ;; Validations
@@ -74,8 +79,16 @@
 ;; =============================================================================
 
 (defn tab [day active?]
-  [:li.tab-title {:class-name (if active? "active")}
-   [:a {:on-click #(dispatch [:schedule/set-active-tab day])}
+  [:li.tab-title {:class-name (if active? "active")
+                  :style (merge (:tab styles)
+                                (if active?
+                                  (:tab-active styles)
+                                  (:tab-inactive styles)))}
+   [:a {:style (merge {:background-color (if active?
+                                           "#fff"
+                                           "#f8f8f8")}
+                      (:tab-name styles))
+        :on-click #(dispatch [:schedule/set-active-tab day])}
     (tab-name day)]])
 
 (defn tabs [days-of-the-week]
@@ -118,8 +131,8 @@
    [:button.tiny.alert {:type :button
                         :on-click #(dispatch [:schedule/delete-schedule schedule])}
     "Sim"]
-   [:button.tiny.alert {:type :button
-                        :on-click #(dispatch [:schedule/set-deleting (:id schedule) false])}
+   [:button.tiny {:type :button
+                  :on-click #(dispatch [:schedule/set-deleting (:id schedule) false])}
     "Não"]])
 
 (defn schedule-line [schedule]
@@ -134,58 +147,67 @@
         [delete-schedule-line schedule]
 
         :else
-        [:li
-         (str (:description schedule) " - " (:time schedule))
-         [:button.tiny {:on-click #(dispatch [:schedule/set-editing (:id schedule) true])}
-          "Editar"]
-         [:button.tiny.alert {:on-click #(dispatch [:schedule/set-deleting (:id schedule) true])}
-          "Remover"]]))))
+        [:div.large-12.columns
+         [:div.large-4.columns
+          [:span (:description schedule)]
+          " "
+          [:span {:style (:badge styles)}
+           (:time schedule)]]
+         [:ul.button-group.radius
+          [:li
+           [:button.tiny {:on-click #(dispatch [:schedule/set-editing (:id schedule) true])}
+            "Editar"]]
+          [:li
+           [:button.tiny.alert {:on-click #(dispatch [:schedule/set-deleting (:id schedule) true])}
+            "Remover"]]]]))))
 
-(defn schedule-list [schedules days-of-the-week]
+(defn new-schedule-form []
   (let [new-schedule (subscribe [:schedule/new-schedule])]
     (fn []
-      (let [active-day     (active-tab @days-of-the-week)
-            schedule-items (->> @schedules
-                                (filter (fn [{:keys [day_of_the_week]}]
-                                          (= active-day day_of_the_week))))]
-        [:div.row
-         [:ul.no-bullet
-          (for [schedule-item schedule-items]
-            ^{:key (:id schedule-item)}
-            [schedule-line schedule-item])]
+      [:form
+       [:fieldset
+        [:legend "Inserir programação"]
+        [:div.large-4.columns
+         [:div.row.collapse.prefix-radius
+          [:div.small-3.columns
+           [:span.prefix "Nome"]]
+          [:div.small-9.columns
+           [:input {:type      :text
+                    :value     (:description @new-schedule)
+                    :on-change #(dispatch [:schedule/set-new :description (helpers/get-target-value %)])}]]]]
 
-         [:form
-          [:fieldset
-           [:legend "Inserir programação"]
-           [:div.row
-            [:div.large-6.columns
-             [:div.row.collapse.prefix-radius
-              [:div.small-3.columns
-               [:span.prefix "Nome"]]
-              [:div.small-9.columns
-               [:input {:type      :text
-                        :value     (:description @new-schedule)
-                        :on-change #(dispatch [:schedule/set-new :description (helpers/get-target-value %)])}]]]]
+        [:div.large-4.columns
+         [:div.row.collapse.prefix-radius
+          [:div.small-9.columns
+           [:input {:type      :text
+                    :value     (:time @new-schedule)
+                    :on-change #(dispatch [:schedule/set-new :time (helpers/get-target-value %)])}]]
+          [:div.small-3.columns
+           [:span.postfix "Horário"]]]]
 
-            [:div.large-6.columns
-             [:div.row.collapse.prefix-radius
-              [:div.small-9.columns
-               [:input {:type      :text
-                        :value     (:time @new-schedule)
-                        :on-change #(dispatch [:schedule/set-new :time (helpers/get-target-value %)])}]]
-              [:div.small-3.columns
-               [:span.postfix "Horário"]]]]]
+        [:div.large-4.columns
+         [:button.tiny {:type     :button
+                        :on-click #(dispatch [:schedule/create active-tab])}
+          "Criar"]]]])))
 
-           [:div.large-2.large-offset-10.columns
-            [:button.small {:type     :button
-                            :on-click #(dispatch [:schedule/create active-tab])}
-             "Criar"]]]]]))))
+(defn schedule-list [schedules days-of-the-week]
+  (let [active-day     (active-tab @days-of-the-week)
+        schedule-items (->> @schedules
+                            (filter (fn [{:keys [day_of_the_week]}]
+                                      (= active-day day_of_the_week))))]
+    [:div
+     [new-schedule-form]
+     [:div
+      (for [schedule-item schedule-items]
+        ^{:key (:id schedule-item)}
+        [schedule-line schedule-item])]]))
 
 (defn schedule-panel []
   (let [schedules        (subscribe [:schedules])
         days-of-the-week (subscribe [:days-of-the-week])]
     (fn []
-      [:div.large-8.columns
-       [:h1 "Programação"]
+      [:div.large-12.columns
+       [:h1 "Programação "
+        [:small "gerencie as informações que aparecem no site."]]
        [tabs @days-of-the-week]
        [schedule-list schedules days-of-the-week]])))
