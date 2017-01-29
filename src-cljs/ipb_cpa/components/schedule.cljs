@@ -1,10 +1,5 @@
 (ns ipb-cpa.components.schedule
-  (:require [ajax.core :refer [DELETE GET POST PUT]]
-            [bouncer.core :as b]
-            [bouncer.validators :as v]
-            [cljs.core.async :as async :refer [put!]]
-            [clojure.string :as s]
-            [re-frame.core :as rf :refer [dispatch subscribe]]
+  (:require [re-frame.core :as rf :refer [dispatch subscribe]]
             [reagent.core :as r]
             [ipb-cpa.helper :as helpers]
             [cljsjs.react-input-mask]))
@@ -42,23 +37,6 @@
            :font-size 12}})
 
 ;; =============================================================================
-;; Validations
-;; =============================================================================
-
-(defn validate-schedule
-  "Validates a schedule and returns a vector where the first element contains
-  the validation errors or nil if the schedule is valid and the second element
-  is the updated schedules with or without errors inside the key
-  :bouncer.core/errors.
-
-  A valid schedule consist in a key :description that is required and the :time
-  which has the format of HH:MMh"
-  [schedule]
-  (b/validate schedule
-              :description [[v/required :message "A programação precisa ter um nome"]]
-              :time [[v/matches #"\d{2}:\d{2}h" :message "O horário precisa ter o formato: 13:30h"]]))
-
-;; =============================================================================
 ;; Components
 ;; =============================================================================
 
@@ -85,33 +63,47 @@
   (if-let [[err-msg] (errors k)]
     [:small.error err-msg]))
 
+(defn- errors-for [errors k]
+  (when errors
+    (when-let [key-errors (errors k)]
+      (for [err key-errors]
+        ^{:key err}
+        [:small.error err]))))
+
 (defn edit-schedule-line [schedule]
-  (let [local-schedule (r/atom schedule)]
+  (let [local-schedule (r/atom schedule)
+        editing-errors (subscribe [:schedule/editing-errors schedule])]
     (fn []
       [:div.large-12.columns
-       [:div.small-6.columns
-        [:label "Nome"]
-        [:input {:type :text
-                 :auto-focus true
-                 :on-key-press (helpers/on-enter #(dispatch [:schedule/put-schedule @local-schedule]))
-                 :value (:description @local-schedule)
-                 :on-change #(swap! local-schedule assoc :description (helpers/get-target-value %))}]]
+       (let [field-errors (errors-for @editing-errors :description)]
+         [:div.small-6.columns
+          [:label {:class (when field-errors "error")}
+           "Nome"
+           [:input {:type :text
+                    :auto-focus true
+                    :on-key-press (helpers/on-enter #(dispatch [:schedule/update @local-schedule]))
+                    :value (:description @local-schedule)
+                    :on-change #(swap! local-schedule assoc :description (helpers/get-target-value %))}]]
+          field-errors])
 
-       [:div.small-6.columns
-        [:label "Horário"]
-        [masked-input {:type :text
-                       :mask "99:99h"
-                       :value (:time @local-schedule)
-                       :on-key-press (helpers/on-enter #(dispatch [:schedule/put-schedule @local-schedule]))
-                       :on-change #(swap! local-schedule assoc :time (helpers/get-target-value %))}]]
+       (let [field-errors (errors-for @editing-errors :time)]
+         [:div.small-6.columns
+          [:label {:class (when field-errors "error")}
+           "Horário"
+           [masked-input {:type :text
+                          :mask "99:99h"
+                          :value (:time @local-schedule)
+                          :on-key-press (helpers/on-enter #(dispatch [:schedule/update @local-schedule]))
+                          :on-change #(swap! local-schedule assoc :time (helpers/get-target-value %))}]]
+          field-errors])
 
        [:div.row
         [:div.large-offset-8.large-4.columns
          [:button.tiny {:type :button
-                        :on-click #(dispatch [:schedule/put-schedule @local-schedule])}
+                        :on-click #(dispatch [:schedule/update @local-schedule])}
           "Salvar"]
          [:button.tiny.alert {:type :button
-                              :on-click #(dispatch [:schedule/set-editing (:id schedule) false])}
+                              :on-click #(dispatch [:schedule/cancel-editing schedule])}
           "Cancelar"]]]])))
 
 (defn delete-schedule-line [schedule]
@@ -151,29 +143,35 @@
 (defn new-schedule-form [dow]
   (let [new-schedule    (subscribe [:schedule/new-schedule])
         active-day      (subscribe [:schedule/active-day])
-        dispatch-create #(dispatch [:schedule/create @active-day])]
+        component       (r/current-component)
+        dispatch-create (fn [_]
+                          (dispatch [:schedule/create @active-day #(r/set-state component {:time ""})]))]
     [:form
      [:fieldset
       [:legend "Inserir programação"]
       [:div.large-4.columns
-       [:div.row.collapse.prefix-radius
+       [:div.row.collapse.prefix-radius.error
         [:div.small-3.columns
          [:span.prefix "Nome"]]
         [:div.small-9.columns
          [:input {:type      :text
                   :value     (:description @new-schedule)
-                  :on-change #(dispatch [:schedule/set-new :description (helpers/get-target-value %)])}]]]]
+                  :on-change #(dispatch [:schedule/set-new :description (helpers/get-target-value %)])}]]]
+       (errors-for (:errors @new-schedule) :description)]
 
       [:div.large-4.columns
-       [:div.row.collapse.prefix-radius
+       [:div.row.collapse.prefix-radius.error
         [:div.small-9.columns
-         [masked-input {:type          :text
-                        :mask          "99:99h"
-                        :default-value (:time @new-schedule)
-                        :on-key-press  (helpers/on-enter dispatch-create)
-                        :on-change     #(dispatch [:schedule/set-new :time (helpers/get-target-value %)])}]]
+         [masked-input {:type         :text
+                        :value        (or (:time (r/state component)) "")
+                        :mask         "99:99h"
+                        :on-key-press (helpers/on-enter dispatch-create)
+                        :on-change    (fn [e]
+                                        (r/set-state component {:time (helpers/get-target-value e)})
+                                        (dispatch [:schedule/set-new :time (helpers/get-target-value e)]))}]]
         [:div.small-3.columns
-         [:span.postfix "Horário"]]]]
+         [:span.postfix "Horário"]]]
+       (errors-for (:errors @new-schedule) :time)]
 
       [:div.large-4.columns
        [:button.tiny {:type     :button

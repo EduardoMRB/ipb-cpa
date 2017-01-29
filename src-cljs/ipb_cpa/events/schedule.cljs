@@ -1,7 +1,47 @@
 (ns ipb-cpa.events.schedule
   (:require [ajax.core :as ajax]
-            [re-frame.core :as rf :refer [reg-event-db reg-event-fx]]
+            [re-frame.core :as rf :refer [reg-event-db reg-event-fx reg-fx]]
+            [bouncer.core :as b]
+            [bouncer.validators :as v]
             [com.rpl.specter :as specter :refer [setval ALL]]))
+
+;; ------------------------------
+;; Validation
+;; ------------------------------
+
+(defn validate-schedule
+  "Validates a schedule and returns a vector where the first element contains
+  the validation errors or nil if the schedule is valid and the second element
+  is the updated schedules with or without errors inside the key
+  :bouncer.core/errors.
+
+  A valid schedule consist in a key :description that is required and the :time
+  which has the format of HH:MMh"
+  [schedule]
+  (b/validate schedule
+              :description [[v/required :message "A programação precisa ter um nome"]]
+              :time [[v/matches #"\d{2}:\d{2}h" :message "O horário precisa ter o formato: 13:30h"]]))
+
+(reg-fx
+ :schedule/validate
+ (fn validate [{:keys [schedule on-validate on-error]}]
+   (let [[errors schedule] (validate-schedule schedule)]
+     (if errors
+       (rf/dispatch (conj on-error schedule errors))
+       (rf/dispatch (conj on-validate schedule))))))
+
+(reg-event-fx
+ :schedule/update
+ (fn [{:keys [db]} [_ schedule]]
+   {:db                db
+    :schedule/validate {:schedule    schedule
+                        :on-validate [:schedule/put-schedule]
+                        :on-error    [:schedule/validation-error]}}))
+
+(reg-event-db
+ :schedule/validation-error
+ (fn [db [_ schedule errors]]
+   (assoc-in db [:editing-schedules-errors (:id schedule)] errors)))
 
 (def day-kw->day
   {:seg  "Segunda"
@@ -50,8 +90,15 @@
  (fn [{:keys [db]} [_ schedule _]]
    {:db (setval [:schedules ALL #(= (:id schedule) (:id %))]
                 schedule
-                db)
+                (assoc-in db [:editing-schedules-errors (:id schedule)] nil))
     :dispatch [:schedule/set-editing (:id schedule) false]}))
+
+(reg-event-fx
+ :schedule/cancel-editing
+ (fn [{:keys [db]} [_ schedule]]
+   (let [schedule-id (:id schedule)]
+     {:db (assoc-in db [:editing-schedules-errors schedule-id] nil)
+      :dispatch [:schedule/set-editing schedule-id false]})))
 
 (reg-event-db
  :schedule/set-editing
@@ -96,18 +143,31 @@
 
 (reg-event-fx
  :schedule/create
- (fn [{:keys [db]} [_ dow]]
-   (let [new-schedule (assoc (:new-schedule db) :day_of_the_week dow)]
-     {:db         (assoc db :new-schedule {:description     ""
-                                           :time            ""
-                                           :day_of_the_week ""})
-      :http-xhrio {:method          :post
-                   :uri             "/api/schedule"
-                   :params          new-schedule
-                   :format          (ajax/json-request-format)
-                   :response-format (ajax/json-response-format {:keywords true})
-                   :on-success      [:schedule/created new-schedule]
-                   :on-failure      [:schedule/error-on-create]}})))
+ (fn [{:keys [db]} [_ dow on-success]]
+   {:db db
+    :schedule/validate {:schedule (assoc (:new-schedule db) :day_of_the_week dow)
+                        :on-validate [:schedule/post on-success]
+                        :on-error [:schedule/creation-errors]}}))
+
+(reg-event-db
+ :schedule/creation-errors
+ (fn [db [_ _schedule errors]]
+   (assoc-in db [:new-schedule :errors] errors)))
+
+(reg-event-fx
+ :schedule/post
+ (fn [{:keys [db]} [_ on-success new-schedule]]
+   {:db         (assoc db :new-schedule {:description     ""
+                                         :time            ""
+                                         :day_of_the_week ""
+                                         :errors          nil})
+    :http-xhrio {:method          :post
+                 :uri             "/api/schedule"
+                 :params          new-schedule
+                 :format          (ajax/json-request-format)
+                 :response-format (ajax/json-response-format {:keywords true})
+                 :on-success      [:schedule/created on-success new-schedule]
+                 :on-failure      [:schedule/error-on-create]}}))
 
 (reg-event-db
  :schedule/error-on-create
@@ -117,5 +177,6 @@
 
 (reg-event-db
  :schedule/created
- (fn [db [_ new-schedule result]]
+ (fn [db [_ on-success new-schedule result]]
+   (on-success)
    (update db :schedules conj (assoc new-schedule :id (result "schedule-id")))))

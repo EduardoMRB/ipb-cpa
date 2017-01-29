@@ -25,6 +25,12 @@
      false)))
 
 (reg-sub
+ :schedule/editing-errors
+ (fn [db [_ schedule]]
+   (when-let [errors (get-in db [:editing-schedules-errors (:id schedule)])]
+     errors)))
+
+(reg-sub
  :schedule/deleting?
  (fn [db [_ schedule]]
    (if-let [deleting? (get-in db [:deleting-schedules (:id schedule)])]
