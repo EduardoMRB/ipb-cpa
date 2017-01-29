@@ -97,17 +97,17 @@
 (reg-event-fx
  :schedule/create
  (fn [{:keys [db]} [_ dow]]
-   (let [new-schedule (:new-schedule db)]
-     {:db         (assoc db :new-schedule {:description ""
-                                           :time ""
+   (let [new-schedule (assoc (:new-schedule db) :day_of_the_week dow)]
+     {:db         (assoc db :new-schedule {:description     ""
+                                           :time            ""
                                            :day_of_the_week ""})
-      :http-xhrio {:method :post
-                   :uri "/api/schedule"
-                   :params new-schedule
-                   :format (ajax/json-request-format)
+      :http-xhrio {:method          :post
+                   :uri             "/api/schedule"
+                   :params          new-schedule
+                   :format          (ajax/json-request-format)
                    :response-format (ajax/json-response-format {:keywords true})
-                   :on-success [:schedule/created new-schedule]
-                   :on-failure [:schedule/error-on-create]}})))
+                   :on-success      [:schedule/created new-schedule]
+                   :on-failure      [:schedule/error-on-create]}})))
 
 (reg-event-db
  :schedule/error-on-create

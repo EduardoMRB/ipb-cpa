@@ -6,7 +6,10 @@
             [clojure.string :as s]
             [re-frame.core :as rf :refer [dispatch subscribe]]
             [reagent.core :as r]
-            [ipb-cpa.helper :as helpers]))
+            [ipb-cpa.helper :as helpers]
+            [cljsjs.react-input-mask]))
+
+(def masked-input (r/adapt-react-class js/InputElement))
 
 ;; ------------------------
 ;; Styles
@@ -96,10 +99,11 @@
 
        [:div.small-6.columns
         [:label "Horário"]
-        [:input {:type :text
-                 :value (:time @local-schedule)
-                 :on-key-press (helpers/on-enter #(dispatch [:schedule/put-schedule @local-schedule]))
-                 :on-change #(swap! local-schedule assoc :time (helpers/get-target-value %))}]]
+        [masked-input {:type :text
+                       :mask "99:99h"
+                       :value (:time @local-schedule)
+                       :on-key-press (helpers/on-enter #(dispatch [:schedule/put-schedule @local-schedule]))
+                       :on-change #(swap! local-schedule assoc :time (helpers/get-target-value %))}]]
 
        [:div.row
         [:div.large-offset-8.large-4.columns
@@ -163,10 +167,11 @@
       [:div.large-4.columns
        [:div.row.collapse.prefix-radius
         [:div.small-9.columns
-         [:input {:type         :text
-                  :value        (:time @new-schedule)
-                  :on-key-press (helpers/on-enter dispatch-create)
-                  :on-change    #(dispatch [:schedule/set-new :time (helpers/get-target-value %)])}]]
+         [masked-input {:type          :text
+                        :mask          "99:99h"
+                        :default-value (:time @new-schedule)
+                        :on-key-press  (helpers/on-enter dispatch-create)
+                        :on-change     #(dispatch [:schedule/set-new :time (helpers/get-target-value %)])}]]
         [:div.small-3.columns
          [:span.postfix "Horário"]]]]
 
