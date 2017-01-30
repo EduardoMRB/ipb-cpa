@@ -1,5 +1,6 @@
 (ns ipb-cpa.views
   (:require [ipb-cpa.components.schedule :as schedule]
+            [ipb-cpa.components.videos :as videos]
             [re-frame.core :as rf :refer [subscribe]]))
 
 (def sections
@@ -21,6 +22,20 @@
   [:div.columns
    [:h1 "Here are the videos"]])
 
+(defmulti page identity)
+
+(defmethod page :home-panel [_]
+  [dashboard])
+
+(defmethod page :schedule-panel [_]
+  [schedule/schedule-panel])
+
+(defmethod page :videos-panel [_]
+  [videos/videos-panel])
+
+(defmethod page :default [_]
+  [:h1 "whoops"])
+
 (defn main-panel []
   (let [active-panel (subscribe [:active-panel])]
     (fn []
@@ -34,10 +49,6 @@
          [menu]]]
 
        [:main.admin-content
-        (case @active-panel
-          :home-panel [dashboard]
-          :schedule-panel [schedule/schedule-panel]
-          :videos-panel [videos]
-          [:h1 "whoops"])]
+        (page @active-panel)]
 
        [:footer.admin-footer]])))

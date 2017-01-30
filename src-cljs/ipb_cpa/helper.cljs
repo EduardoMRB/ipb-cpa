@@ -13,6 +13,17 @@
   (if-let [[error] (errors k)]
     [:small.error error]))
 
+(defn errors-for
+  "For all messages in `errors` with keyword `k` a `small` html element containing
+  it."
+  [errors k]
+  (when errors
+    (when-let [key-errors (errors k)]
+      (for [err key-errors]
+        ^{:key err}
+        [:small.error err]))))
+
+
 (defn on-enter [f]
   (fn [evt]
     (when (= "Enter" (.-key evt))

@@ -53,3 +53,13 @@
    (filter (fn [{:keys [day_of_the_week]}]
              (= day day_of_the_week))
            (:schedules db))))
+
+(reg-sub
+ :videos/all
+ (fn [db _]
+   (:videos/videos db)))
+
+(reg-sub
+ :videos/new
+ (fn [db _]
+   (:videos/new db)))

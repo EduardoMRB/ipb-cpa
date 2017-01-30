@@ -7,8 +7,6 @@
             [bouncer.validators :as v]
             [cljs-time.format :as f]))
 
-(enable-console-print!)
-
 (def ESC-CODE 27)
 (def app-state
   (atom {:videos [{:title "Literatura e Cristianismo"

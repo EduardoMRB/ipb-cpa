@@ -63,19 +63,12 @@
   (if-let [[err-msg] (errors k)]
     [:small.error err-msg]))
 
-(defn- errors-for [errors k]
-  (when errors
-    (when-let [key-errors (errors k)]
-      (for [err key-errors]
-        ^{:key err}
-        [:small.error err]))))
-
 (defn edit-schedule-line [schedule]
   (let [local-schedule (r/atom schedule)
         editing-errors (subscribe [:schedule/editing-errors schedule])]
     (fn []
       [:div.large-12.columns
-       (let [field-errors (errors-for @editing-errors :description)]
+       (let [field-errors (helpers/errors-for @editing-errors :description)]
          [:div.small-6.columns
           [:label {:class (when field-errors "error")}
            "Nome"
@@ -86,7 +79,7 @@
                     :on-change #(swap! local-schedule assoc :description (helpers/get-target-value %))}]]
           field-errors])
 
-       (let [field-errors (errors-for @editing-errors :time)]
+       (let [field-errors (helpers/errors-for @editing-errors :time)]
          [:div.small-6.columns
           [:label {:class (when field-errors "error")}
            "Horário"
@@ -157,7 +150,7 @@
          [:input {:type      :text
                   :value     (:description @new-schedule)
                   :on-change #(dispatch [:schedule/set-new :description (helpers/get-target-value %)])}]]]
-       (errors-for (:errors @new-schedule) :description)]
+       (helpers/errors-for (:errors @new-schedule) :description)]
 
       [:div.large-4.columns
        [:div.row.collapse.prefix-radius.error
@@ -171,7 +164,7 @@
                                         (dispatch [:schedule/set-new :time (helpers/get-target-value e)]))}]]
         [:div.small-3.columns
          [:span.postfix "Horário"]]]
-       (errors-for (:errors @new-schedule) :time)]
+       (helpers/errors-for (:errors @new-schedule) :time)]
 
       [:div.large-4.columns
        [:button.tiny {:type     :button
