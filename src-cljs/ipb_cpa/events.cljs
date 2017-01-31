@@ -2,7 +2,8 @@
   (:require [ipb-cpa.db :as db]
             [re-frame.core :as rf :refer [reg-event-db reg-event-fx]]
             [day8.re-frame.http-fx]
-            [ipb-cpa.events.schedule]))
+            [ipb-cpa.events.schedule]
+            [ipb-cpa.events.videos]))
 
 (reg-event-db
  :initialize-db

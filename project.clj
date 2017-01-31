@@ -40,7 +40,8 @@
                  [day8.re-frame/http-fx "0.1.3"]
 
                  [com.rpl/specter "0.13.2"]
-                 [cljsjs/react-input-mask "0.7.5-0"]]
+                 [cljsjs/react-input-mask "0.7.5-0"]
+                 [cljsjs/react-datepicker "0.29.0-0"]]
   :clean-targets ^{:protect false} [:profile-path :compile-path "out" "resources/public/js/compiled/out"]
   :figwheel {:css-dirs ["resources/public/css"]}
   :plugins [[lein-cljsbuild "1.1.5"]]
