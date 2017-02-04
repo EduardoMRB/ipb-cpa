@@ -3,25 +3,21 @@
 
 (defqueries "ipb_cpa/sql/schedule.sql")
 
-(defn- as-vector
-  ([{:keys [day_of_the_week description time]}]
-   [day_of_the_week description time])
-  ([schedule id]
-   (conj (as-vector schedule) id)))
-
-(def get-schedules select-all-schedules)
+(defn get-schedules [db]
+  (select-all-schedules {} {:connection db}))
 
 (defn get-schedule [db schedule-id]
-  (first (select-schedule db schedule-id)))
+  (select-schedule {:id schedule-id} {:connection db :result-set-fn first}))
 
 (defn add-schedule! [db schedule]
-  (apply insert-schedule! db (as-vector schedule)))
+  (insert-schedule! schedule {:connection db}))
 
 (defn add-schedule<! [db schedule]
-  (let [res (apply insert-schedule<! db (as-vector schedule))]
+  (let [res (insert-schedule<! schedule {:connection db})]
     (second (first res))))
 
 (defn modify-schedule! [db schedule-id new-schedule]
-  (apply update-schedule! db (as-vector new-schedule schedule-id)))
+  (update-schedule! (assoc new-schedule :id schedule-id) {:connection db}))
 
-(def remove-schedule! delete-schedule!)
+(defn remove-schedule! [db id]
+  (delete-schedule! {:id id} {:connection db}))

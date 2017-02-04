@@ -72,7 +72,7 @@
  (fn [{:keys [db]} [_ schedule]]
    {:db db
     :http-xhrio {:method :put
-                 :uri (str "/api/schedule/" (:id schedule))
+                 :uri (str "/api/schedule/" (:id schedule) "?token=" (:token db))
                  :params schedule
                  :format (ajax/json-request-format)
                  :response-format (ajax/json-response-format {:keywords true})
@@ -110,7 +110,7 @@
  (fn [{:keys [db]} [_ schedule]]
    {:db db
     :http-xhrio {:method :delete
-                 :uri (str "/api/schedule/" (:id schedule))
+                 :uri (str "/api/schedule/" (:id schedule) "?token=" (:token db))
                  :format (ajax/json-request-format)
                  :response-format (ajax/json-response-format {:keywords true})
                  :on-success [:schedule/deleted schedule]
@@ -162,7 +162,7 @@
                                          :day_of_the_week ""
                                          :errors          nil})
     :http-xhrio {:method          :post
-                 :uri             "/api/schedule"
+                 :uri             (str "/api/schedule?token=" (:token db))
                  :params          new-schedule
                  :format          (ajax/json-request-format)
                  :response-format (ajax/json-response-format {:keywords true})
@@ -180,3 +180,19 @@
  (fn [db [_ on-success new-schedule result]]
    (on-success)
    (update db :schedules conj (assoc new-schedule :id (result "schedule-id")))))
+
+(reg-event-fx
+ :schedule/load-schedule
+ (fn [{:keys [db]} _]
+   {:db db
+    :http-xhrio {:method :get
+                 :uri (str "/api/schedule?token=" (:token db))
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success [:set-schedules]
+                 :on-failure [:schedule/load-error]}}))
+
+(reg-event-db
+ :schedule/load-error
+ (fn [db [_ err]]
+   (println err)
+   db))

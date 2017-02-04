@@ -146,14 +146,19 @@
      [video-row video])])
 
 (defn videos-panel []
-  (let [videos (subscribe [:videos/all])
-        new    (subscribe [:videos/new])]
-    [:div.large-12.columns
-     [:h1 "Vídeos "
-      [:small "Cadastre vídeos para que eles apareçam no site"]]
+  (let [videos   (subscribe [:videos/all])
+        new      (subscribe [:videos/new])
+        loading? (subscribe [:videos/loading?])]
+    (if @loading?
+      [:div.large-12.columns
+       [:i.fa.fa-spinner.fa-spin.fa-5x]]
 
-     [:div.row
-      [video-list @videos]]
+      [:div.large-12.columns
+       [:h1 "Vídeos "
+        [:small "Cadastre vídeos para que eles apareçam no site"]]
 
-     [:div.row
-      [new-video @new]]]))
+       [:div.row
+        [video-list @videos]]
+
+       [:div.row
+        [new-video @new]]])))

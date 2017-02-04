@@ -22,7 +22,7 @@
                  [com.taoensso/carmine "2.10.0"]
 
                  [instaparse "1.4.0"]
-                 [yesql "0.4.0"]
+                 [yesql "0.5.3"]
                  [org.postgresql/postgresql "9.4-1201-jdbc41"]
                  [ragtime "0.5.1"]
                  [environ "1.0.0"]
@@ -41,7 +41,11 @@
 
                  [com.rpl/specter "0.13.2"]
                  [cljsjs/react-input-mask "0.7.5-0"]
-                 [cljsjs/react-datepicker "0.29.0-0"]]
+                 [cljsjs/react-datepicker "0.29.0-0"]
+                 [buddy "1.3.0"]
+                 [buddy/buddy-hashers "1.2.0"]
+                 [org.clojure/core.match "0.3.0-alpha4"]
+                 [com.pupeno/free-form "0.5.0"]]
   :clean-targets ^{:protect false} [:profile-path :compile-path "out" "resources/public/js/compiled/out"]
   :figwheel {:css-dirs ["resources/public/css"]}
   :plugins [[lein-cljsbuild "1.1.5"]]

@@ -1,6 +1,7 @@
 (ns ipb-cpa.events.videos
   (:require [re-frame.core :as rf :refer [reg-event-db reg-event-fx]]
-            [com.rpl.specter :as specter :refer [transform setval ALL]]))
+            [com.rpl.specter :as specter :refer [transform setval ALL]]
+            [ajax.core :as ajax]))
 
 (defn video-path [video]
   [:videos/videos ALL #(= (:id %) (:id video))])
@@ -41,3 +42,30 @@
      (-> db
          (update :videos/videos conj video)
          (assoc :videos/new default-new)))))
+
+(reg-event-fx
+ :videos/load-videos
+ (fn [{:keys [db]} _]
+   {:db (assoc db :videos/loading? true)
+    :http-xhrio {:method :get
+                 :uri (str "/api/videos?token=" (:token db))
+                 :response-format (ajax/json-response-format {:keywords? true})
+                 :on-success [:videos/loaded-successfully]
+                 :on-failure [:videos/load-failed]}}))
+
+(defn ->moment [datestr]
+  (js/moment datestr))
+
+(reg-event-db
+ :videos/loaded-successfully
+ (fn [db [_ videos]]
+   (let [videos-with-moment-dates (map #(update % :date ->moment) videos)]
+     (-> db
+         (assoc :videos/loading? false)
+         (assoc :videos/videos videos-with-moment-dates)))))
+
+(reg-event-db
+ :videos/load-failed
+ (fn [db [_ err]]
+   (println "Error:" err)
+   (assoc db :videos/loading? false)))

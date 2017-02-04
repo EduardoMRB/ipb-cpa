@@ -1,5 +1,7 @@
 (ns ipb-cpa.service
-  (:require [io.pedestal.http :as bootstrap]
+  (:require [io.pedestal
+             [http :as bootstrap]
+             [log :as log]]
             [io.pedestal.http
              [body-params :as body-params]
              [ring-middlewares :as ring-middlewares]
@@ -9,14 +11,16 @@
             [ipb-cpa
              [db :as database]
              [mail :as mail]]
+            [ipb-cpa.service
+             [auth :as auth]
+             [videos :as videos]]
             [ipb-cpa.view
              [about :as about-view]
              [admin-view :as admin-view]
              [contact :as contact-view]
              [home :as home-view]
              [institutional :as institutional]]
-            [ring.util.response :as ring-resp]
-            [io.pedestal.log :as log]))
+            [ring.util.response :as ring-resp]))
 
 (declare url-for)
 
@@ -115,10 +119,17 @@
                         "/schedule" {:get [:admin.schedule#index admin-schedule-page]}
                         "/video"    {:get [:admin.video#index admin-video-page]}}
          "/api"        {:interceptors [bootstrap/json-body ring-middlewares/keyword-params]
-                        "/schedule"   {:get   [:api.schedule#index get-json-schedules]
-                                       :post  [:api.schedule#create add-schedule]
-                                       "/:id" {:delete [:api.schedule#delete delete-schedule]
-                                               :put    [:api.schedule#update update-schedule]}}}}})
+                        "/schedule"   {:interceptors [auth/auth-interceptor]
+                                       :get          [:api.schedule#index get-json-schedules]
+                                       :post         [:api.schedule#create add-schedule]
+                                       "/:id"        {:delete [:api.schedule#delete delete-schedule]
+                                                      :put    [:api.schedule#update update-schedule]}}
+                        "/videos"     {:interceptors [auth/auth-interceptor]
+                                       :get          [:api.videos#index videos/get-videos]
+                                       :post         [:api.videos#create videos/create]
+                                       "/:id"        {:delete [:api.videos#delete videos/delete]
+                                                      :put    [:api.videos#update videos/change]}}
+                        "/token"      {:put [:api.token#put auth/create-token]}}}})
 
 (def url-for (route/url-for-routes (route/expand-routes routes)))
 

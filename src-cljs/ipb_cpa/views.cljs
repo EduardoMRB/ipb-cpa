@@ -1,26 +1,24 @@
 (ns ipb-cpa.views
-  (:require [ipb-cpa.components.schedule :as schedule]
+  (:require [ipb-cpa.components.login :as login]
+            [ipb-cpa.components.schedule :as schedule]
             [ipb-cpa.components.videos :as videos]
-            [re-frame.core :as rf :refer [subscribe]]))
+            [re-frame.core :as rf :refer [dispatch subscribe]]))
 
 (def sections
-  [{:url "#/schedule" :name "Programação"}
-   {:url "#/videos" :name "Vídeos"}])
+  [{:url "#/schedule" :name "Programação" :panel :schedule-panel}
+   {:url "#/videos" :name "Vídeos" :panel :videos-panel}])
 
-(defn menu []
+(defn menu [active-panel]
   [:ul
    (for [section sections]
      ^{:key (:url section)}
-     [:li
+     [:li {:class (when (= active-panel (:panel section))
+                    "active")}
       [:a {:href (:url section)} (:name section)]])])
 
 (defn dashboard []
   [:div.columns
    [:h1 "Here is the dashboard"]])
-
-(defn videos []
-  [:div.columns
-   [:h1 "Here are the videos"]])
 
 (defmulti page identity)
 
@@ -37,8 +35,9 @@
   [:h1 "whoops"])
 
 (defn main-panel []
-  (let [active-panel (subscribe [:active-panel])]
-    (fn []
+  (let [active-panel (subscribe [:active-panel])
+        logged-in?   (subscribe [:logged-in?])]
+    (if @logged-in?
       [:div
        [:nav.top-bar
         [:ul.title-area
@@ -46,9 +45,11 @@
           [:h1
            [:a {:href "#/"} "Admin"]]]]
         [:section.top-bar-section
-         [menu]]]
+         [menu @active-panel]]]
 
        [:main.admin-content
         (page @active-panel)]
 
-       [:footer.admin-footer]])))
+       [:footer.admin-footer]]
+
+      [login/login-screen])))

@@ -63,3 +63,23 @@
  :videos/new
  (fn [db _]
    (:videos/new db)))
+
+(reg-sub
+ :videos/loading?
+ (fn [db _]
+   (:videos/loading? db)))
+
+(reg-sub
+ :logged-in?
+ (fn [db _]
+   (some? (:token db))))
+
+(reg-sub
+ :login/data
+ (fn [db _]
+   (:login/data db)))
+
+(reg-sub
+ :login/errors
+ (fn [db _]
+   (:login/errors db)))
